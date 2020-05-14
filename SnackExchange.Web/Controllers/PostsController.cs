@@ -7,34 +7,42 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SnackExchange.Web.Data;
 using SnackExchange.Web.Models;
+using System.Security.Claims;
+using SnackExchange.Web.Models.Auth;
+using SnackExchange.Web.Repository;
+using Microsoft.AspNetCore.Http;
 
 namespace SnackExchange.Web.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Post> _postRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PostsController(ApplicationDbContext context)
+        public PostsController(IRepository<Post> postRepository, IHttpContextAccessor httpContextAccessor)
         {
-            _context = context;
+            _postRepository = postRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Posts.ToListAsync());
+            return View(_postRepository.GetAll());
         }
 
         // GET: Posts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
+            IQueryable<Post> postQuery = _postRepository.GetAllLazyLoad(x => x.Id == id,p => p.User);
 
-            var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var post = postQuery.FirstOrDefault();
+
+            //var post = await _context.Posts.Include(u => u.User).FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
                 return NotFound();
@@ -54,26 +62,34 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description")] Post post)
+        public IActionResult Create([Bind("Id,Title,Description")] Post post)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(post);
-                await _context.SaveChangesAsync();
+                /*var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                post.User = _context.AppUsers.FirstOrDefault(u => u.Id == userId);*/
+                //_context.Posts.Add(post);
+
+                string userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                post.UserId = userId;
+                _postRepository.Insert(post);
+                //await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(post);
         }
 
         // GET: Posts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            //var post = await _context.Posts.FindAsync(id);
+            var post = _postRepository.GetById(id);
             if (post == null)
             {
                 return NotFound();
@@ -86,7 +102,7 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description")] Post post)
+        public IActionResult Edit(Guid id, [Bind("Id,Title,Description")] Post post)
         {
             if (id != post.Id)
             {
@@ -97,8 +113,7 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    _context.Update(post);
-                    await _context.SaveChangesAsync();
+                    _postRepository.Update(post);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,15 +132,15 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Posts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
 
-            var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.Id == id);
+            //var post = await _context.Posts.FirstOrDefaultAsync(m => m.Id == id);
+            var post = _postRepository.GetById(id);
             if (post == null)
             {
                 return NotFound();
@@ -137,17 +152,20 @@ namespace SnackExchange.Web.Controllers
         // POST: Posts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var post = await _context.Posts.FindAsync(id);
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
+            //            var post = await _context.Posts.FindAsync(id);
+            //var post = _postRepository.GetById(id);
+            _postRepository.Delete(id);
+            //_context.Posts.Remove(post);
+            //await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PostExists(int id)
+        private bool PostExists(Guid id)
         {
-            return _context.Posts.Any(e => e.Id == id);
+            var post = _postRepository.GetById(id);
+            return post != null;
         }
     }
 }

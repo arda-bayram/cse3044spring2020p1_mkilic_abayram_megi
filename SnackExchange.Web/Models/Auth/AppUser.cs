@@ -8,7 +8,13 @@ namespace SnackExchange.Web.Models.Auth
 {
     public class AppUser : IdentityUser
     {
+
+        public AppUser()
+        {
+        }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string CountryCode { get; set; }
+        public virtual List<Post> Posts { get; set; }
     }
 }
