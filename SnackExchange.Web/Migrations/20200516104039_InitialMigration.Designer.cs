@@ -10,8 +10,8 @@ using SnackExchange.Web.Data;
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200514212952_AddVirtualPostsToUser")]
-    partial class AddVirtualPostsToUser
+    [Migration("20200516104039_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

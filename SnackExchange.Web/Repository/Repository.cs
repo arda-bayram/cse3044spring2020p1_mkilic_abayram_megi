@@ -68,5 +68,10 @@ namespace SnackExchange.Web.Repository
             return includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 
+        public T GetItem(Expression<Func<T, bool>> filter = null)
+        {
+            return filter == null ? context.Set<T>().FirstOrDefault() : context.Set<T>().Where(filter).FirstOrDefault();
+        }
+
     }
 }
