@@ -11,6 +11,7 @@ using System.Security.Claims;
 using SnackExchange.Web.Models.Auth;
 using SnackExchange.Web.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace SnackExchange.Web.Controllers
 {
@@ -18,6 +19,7 @@ namespace SnackExchange.Web.Controllers
     {
         private readonly IRepository<Post> _postRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<AppUser> _userManager;
 
         public PostsController(IRepository<Post> postRepository, IHttpContextAccessor httpContextAccessor)
         {
@@ -70,7 +72,6 @@ namespace SnackExchange.Web.Controllers
 
                 post.User = _context.AppUsers.FirstOrDefault(u => u.Id == userId);*/
                 //_context.Posts.Add(post);
-
                 string userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
                 post.UserId = userId;
                 _postRepository.Insert(post);
