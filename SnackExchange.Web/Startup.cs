@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SnackExchange.Web.Repository;
 using SnackExchange.Web.Models.Auth;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net;
 
 namespace SnackExchange.Web
 {

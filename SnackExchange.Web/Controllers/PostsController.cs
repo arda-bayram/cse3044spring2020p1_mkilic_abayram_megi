@@ -12,6 +12,7 @@ using SnackExchange.Web.Models.Auth;
 using SnackExchange.Web.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SnackExchange.Web.Controllers
 {
@@ -34,14 +35,22 @@ namespace SnackExchange.Web.Controllers
             return View(_postRepository.GetAll());
         }
 
+        // GET: Posts
+        [Authorize]
+        public IActionResult MyPosts()
+        {
+            return View(_postRepository.FindBy(p => p.User.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User)));
+        }
+
         // GET: Posts/Details/5
+        [Authorize]
         public IActionResult Details(Guid id)
         {
             if (id == Guid.Empty)
             {
                 return NotFound();
             }
-            IQueryable<Post> postQuery = _postRepository.GetAllLazyLoad(x => x.Id == id,p => p.User);
+            IQueryable<Post> postQuery = _postRepository.FindBy(x => x.Id == id,p => p.User);
 
             var post = postQuery.FirstOrDefault();
             if (post == null)
@@ -53,6 +62,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Posts/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -63,6 +73,7 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult Create([Bind("Id,Title,Description")] Post post)
         {
             if (ModelState.IsValid)
@@ -128,16 +139,15 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Posts/Delete/5
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             if (id == Guid.Empty)
             {
                 return NotFound();
             }
-
-            //var post = await _context.Posts.FirstOrDefaultAsync(m => m.Id == id);
             var post = _postRepository.GetById(id);
-            if (post == null)
+            if (post == null || _userManager.GetUserId(_httpContextAccessor.HttpContext.User) != post.User.Id)
             {
                 return NotFound();
             }
@@ -148,6 +158,7 @@ namespace SnackExchange.Web.Controllers
         // POST: Posts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult DeleteConfirmed(Guid id)
         {
             //            var post = await _context.Posts.FindAsync(id);

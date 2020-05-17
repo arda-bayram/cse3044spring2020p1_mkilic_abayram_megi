@@ -56,11 +56,11 @@ namespace SnackExchange.Web.Repository
             context.SaveChanges();
         }
 
-        public IQueryable<T> GetAllLazyLoad(Expression<Func<T, bool>> filter, params Expression<Func<T, object>>[] children)
+        /*public IQueryable<T> GetAllLazyLoad(Expression<Func<T, bool>> filter, params Expression<Func<T, object>>[] children)
         {
             children.ToList().ForEach(x => entities.Include(x).Load());
             return entities;
-        }
+        }*/
 
         public IQueryable<T> FindBy(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
