@@ -1,4 +1,4 @@
-﻿@inject SignInManager<IdentityUser> SignInManager
+﻿@inject SignInManager<SnackExchange.Web.Models.Auth.AppUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

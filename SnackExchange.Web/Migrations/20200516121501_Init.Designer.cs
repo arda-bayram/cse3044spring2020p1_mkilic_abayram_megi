@@ -10,8 +10,8 @@ using SnackExchange.Web.Data;
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200516111537_CustomUserData")]
-    partial class CustomUserData
+    [Migration("20200516121501_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

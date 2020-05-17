@@ -21,10 +21,11 @@ namespace SnackExchange.Web.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
 
-        public PostsController(IRepository<Post> postRepository, IHttpContextAccessor httpContextAccessor)
+        public PostsController(IRepository<Post> postRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
             _postRepository = postRepository;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: Posts
@@ -43,8 +44,6 @@ namespace SnackExchange.Web.Controllers
             IQueryable<Post> postQuery = _postRepository.GetAllLazyLoad(x => x.Id == id,p => p.User);
 
             var post = postQuery.FirstOrDefault();
-
-            //var post = await _context.Posts.Include(u => u.User).FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
                 return NotFound();
@@ -68,14 +67,10 @@ namespace SnackExchange.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                /*var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                post.User = _context.AppUsers.FirstOrDefault(u => u.Id == userId);*/
-                //_context.Posts.Add(post);
-                string userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                post.UserId = userId;
+                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+                post.User = _userManager.FindByIdAsync(currentUserId).Result; // current user
+                post.UserId = currentUserId;
                 _postRepository.Insert(post);
-                //await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(post);
