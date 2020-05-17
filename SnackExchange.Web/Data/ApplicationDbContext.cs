@@ -18,5 +18,7 @@ namespace SnackExchange.Web.Data
 
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Exchange> Exchanges { get; set; }
     }
 }
