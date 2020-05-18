@@ -17,5 +17,6 @@ namespace SnackExchange.Web.Models.Auth
         public string LastName { get; set; }
         public string CountryCode { get; set; }
         public virtual List<Post> Posts { get; set; }
+        public virtual List<Address> Addresses { get; set; }
     }
 }
