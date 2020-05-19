@@ -2,58 +2,41 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SnackExchange.Web.Data;
 using SnackExchange.Web.Models;
-using SnackExchange.Web.Models.Auth;
-using SnackExchange.Web.Repository;
 
 namespace SnackExchange.Web.Controllers
 {
     public class AddressesController : Controller
     {
-        private readonly IRepository<Address> _addressRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public AddressesController(IRepository<Address> addressRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
+        public AddressesController(ApplicationDbContext context)
         {
-            _addressRepository = addressRepository;
-            _httpContextAccessor = httpContextAccessor;
-            _userManager = userManager;
+            _context = context;
         }
 
         // GET: Addresses
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_addressRepository.GetAll());
-        }
-
-        // GET: Addresses
-        [Authorize]
-        public IActionResult MyPosts()
-        {
-            return View(_addressRepository.FindBy(p => p.User.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User)));
+            var applicationDbContext = _context.Addresses.Include(a => a.User);
+            return View(await applicationDbContext.ToListAsync());
         }
 
         // GET: Addresses/Details/5
-        [Authorize]
-        public IActionResult Details(Guid id)
+        public async Task<IActionResult> Details(Guid? id)
         {
-            if (id == Guid.Empty)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            IQueryable<Address> addressQuery = _addressRepository.FindBy(x => x.Id == id);
-
-            var address = addressQuery.FirstOrDefault();
-
+            var address = await _context.Addresses
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (address == null)
             {
                 return NotFound();
@@ -63,53 +46,53 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Addresses/Create
-        [Authorize]
         public IActionResult Create()
         {
+            ViewData["UserId"] = new SelectList(_context.AppUsers, "Id", "Id");
             return View();
         }
 
         // POST: Addresses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public IActionResult Create([Bind("Title,Text,PlusCode,Id")] Address address)
+        public async Task<IActionResult> Create([Bind("Title,Text,PlusCode,UserId,Id,CreatedAt,UpdatedAt")] Address address)
         {
             if (ModelState.IsValid)
             {
-                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                address.User = _userManager.FindByIdAsync(currentUserId).Result; // current user
-                address.UserId = currentUserId;
-                _addressRepository.Insert(address);
+                address.Id = Guid.NewGuid();
+                _context.Add(address);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["UserId"] = new SelectList(_context.AppUsers, "Id", "Id", address.UserId);
             return View(address);
         }
 
         // GET: Addresses/Edit/5
-        public IActionResult Edit(Guid id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == Guid.Empty)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var address = _addressRepository.GetById(id);
+            var address = await _context.Addresses.FindAsync(id);
             if (address == null)
             {
                 return NotFound();
             }
+            ViewData["UserId"] = new SelectList(_context.AppUsers, "Id", "Id", address.UserId);
             return View(address);
         }
 
         // POST: Addresses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Title,Text,PlusCode,Id")] Address address)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Title,Text,PlusCode,UserId,Id,CreatedAt,UpdatedAt")] Address address)
         {
             if (id != address.Id)
             {
@@ -120,7 +103,8 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    _addressRepository.Update(address);
+                    _context.Update(address);
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -135,20 +119,22 @@ namespace SnackExchange.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["UserId"] = new SelectList(_context.AppUsers, "Id", "Id", address.UserId);
             return View(address);
         }
 
         // GET: Addresses/Delete/5
-        [Authorize]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == Guid.Empty)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var address = _addressRepository.GetById(id);
-            if (address == null || _userManager.GetUserId(_httpContextAccessor.HttpContext.User) != address.User.Id)
+            var address = await _context.Addresses
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (address == null)
             {
                 return NotFound();
             }
@@ -159,17 +145,17 @@ namespace SnackExchange.Web.Controllers
         // POST: Addresses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public IActionResult DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            _addressRepository.Delete(id);
+            var address = await _context.Addresses.FindAsync(id);
+            _context.Addresses.Remove(address);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AddressExists(Guid id)
         {
-            var address = _addressRepository.GetById(id);
-            return address != null;
+            return _context.Addresses.Any(e => e.Id == id);
         }
     }
 }
