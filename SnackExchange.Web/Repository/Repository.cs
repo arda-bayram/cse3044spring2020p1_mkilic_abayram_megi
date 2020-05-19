@@ -44,6 +44,7 @@ namespace SnackExchange.Web.Repository
         public void Update(T entity)
         {
             if (entity == null) throw new ArgumentNullException("entity");
+            context.Update(entity);
             context.SaveChanges();
         }
 
