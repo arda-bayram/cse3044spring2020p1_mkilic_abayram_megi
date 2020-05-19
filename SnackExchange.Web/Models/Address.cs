@@ -15,5 +15,7 @@ namespace SnackExchange.Web.Models
         [ForeignKey("User")]
         public string UserId { get; set; }
         public virtual AppUser User { get; set; }
+
+        public virtual Country Country { get; set; }
     }
 }
