@@ -392,6 +392,42 @@ namespace SnackExchange.Web.Migrations
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("SnackExchange.Web.Models.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ExchangeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OriginCountryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Price")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExchangeId");
+
+                    b.HasIndex("OriginCountryId");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("SnackExchange.Web.Models.Auth.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -512,6 +548,17 @@ namespace SnackExchange.Web.Migrations
                     b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "User")
                         .WithMany("Posts")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("SnackExchange.Web.Models.Product", b =>
+                {
+                    b.HasOne("SnackExchange.Web.Models.Exchange", "Exchange")
+                        .WithMany("Products")
+                        .HasForeignKey("ExchangeId");
+
+                    b.HasOne("SnackExchange.Web.Models.Country", "OriginCountry")
+                        .WithMany()
+                        .HasForeignKey("OriginCountryId");
                 });
 
             modelBuilder.Entity("SnackExchange.Web.Models.Auth.AppUser", b =>

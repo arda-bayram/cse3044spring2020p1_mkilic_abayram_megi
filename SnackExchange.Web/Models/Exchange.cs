@@ -31,7 +31,7 @@ namespace SnackExchange.Web.Models
 
         [EnumDataType(typeof(ExchangeStatus))]
         public ExchangeStatus Status { get; set; }
-
+        public virtual List<Product> Products { get; set; }
     }
 
     public enum ExchangeStatus
