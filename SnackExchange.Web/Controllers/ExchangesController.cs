@@ -87,7 +87,7 @@ namespace SnackExchange.Web.Controllers
                 exchange.ModeratorId = String.Empty;
                 exchange.ModeratorNotes = String.Empty;
                 exchange.TrackingNumber = String.Empty;
-                //exchange.Status = exchange.Exchange;
+                exchange.Status = ExchangeStatus.Created;
                 _exchangeRepository.Insert(exchange);
                 return RedirectToAction(nameof(Index));
             }
@@ -184,6 +184,7 @@ namespace SnackExchange.Web.Controllers
         {
             exchange.Sender = user;
             exchange.SenderId = user.Id;
+            exchange.Status = ExchangeStatus.Waiting;
             return View(exchange);
         }
         public IActionResult AddModerator(Exchange exchange, AppUser user)
@@ -200,6 +201,7 @@ namespace SnackExchange.Web.Controllers
         public IActionResult AddTrackingNumber(Exchange exchange, String trackingNumber)
         {
             exchange.TrackingNumber = trackingNumber;
+            exchange.Status = ExchangeStatus.OnAir;
             return View(exchange);
         }
     }

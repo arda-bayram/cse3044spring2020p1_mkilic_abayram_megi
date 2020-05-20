@@ -38,6 +38,8 @@ namespace SnackExchange.Web.Models
     {
         Waiting = 1,
         Accepted = 2,
-        Completed = 3
+        Completed = 3,
+        Created = 4,
+        OnAir = 5
     }
 }

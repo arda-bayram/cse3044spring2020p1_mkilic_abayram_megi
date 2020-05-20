@@ -157,7 +157,9 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
                     CountryCode = country.Code,
                     UserStatus = UserStatus.Active
                 };
+                var result = await _userManager.CreateAsync(user, Input.Password);
                 #endregion User
+
                 #region Address
                 var address = new Address
                 {
@@ -180,15 +182,17 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
                 }
                 // update user address list
                 user.Addresses.Add(address);
-
-                // Update address list on country.
-                //var currentCountry = _countryRepository.FindBy(c => c.Id == address.Country.Id).FirstOrDefault();
+                var updateResult = _userManager.UpdateAsync(user);
+                if (!updateResult.Result.Succeeded)
+                {
+                    _logger.LogError("User cannot be updated.");
+                }
                 country.Addresses.Add(address);
                 _countryRepository.Update(country);
                 #endregion Address
                 //end of register
 
-                var result = await _userManager.CreateAsync(user, Input.Password);
+
 
                 if (result.Succeeded)
                 {
