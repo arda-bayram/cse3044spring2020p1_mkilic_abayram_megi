@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
@@ -27,19 +28,22 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IRepository<Country> _countryRepository;
+        private readonly IRepository<Address> _addressRepository;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            IRepository<Country> countryRepository)
+            IRepository<Country> countryRepository,
+            IRepository<Address> addressRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
             _countryRepository = countryRepository;
+            _addressRepository = addressRepository;
         }
 
         [BindProperty]
@@ -92,10 +96,20 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             [Display(Name = "Currency")]
             public string Currency { get; set; }
 
-            //[Required]
-            //[DataType(DataType.Text)]
-            //[Display(Name = "Address")]
-            //public Address Address { get; set; }
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Address Title")]
+            public string AddressTitle { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Address Plus Code")]
+            public string AddressPlusCode { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Address Text")]
+            public string AddressText { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -110,9 +124,13 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-
-                var country = new Country { Name = Input.Country, Currency = Input.Currency, Code = Input.CountryCode };
-
+                #region Country
+                var country = new Country
+                {
+                    Name = Input.Country,
+                    Currency = Input.Currency,
+                    Code = Input.CountryCode,
+                };
                 var countries = _countryRepository.FindBy(c => c.Name == country.Name);
                 var previousCountry = countries.FirstOrDefault();
 
@@ -126,7 +144,8 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
                     _countryRepository.Insert(country);
                     _logger.LogInformation("Country added to database.");
                 }
-
+                #endregion Country
+                #region User
                 var user = new AppUser
                 {
                     UserName = Input.Email,
@@ -138,6 +157,36 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
                     CountryCode = country.Code,
                     UserStatus = UserStatus.Active
                 };
+                #endregion User
+                #region Address
+                var address = new Address
+                {
+                    Title = Input.AddressTitle,
+                    Text = Input.AddressText,
+                    PlusCode = Input.AddressPlusCode,
+                    User = user,
+                    UserId = user.Id,
+                    Country = country
+                };
+
+                if (address != null)
+                {
+                    _addressRepository.Insert(address);
+                    _logger.LogInformation("Address added to database.");
+                }
+                else
+                {
+                    _logger.LogInformation("Address error while inserting database.");
+                }
+                // update user address list
+                user.Addresses.Add(address);
+
+                // Update address list on country.
+                //var currentCountry = _countryRepository.FindBy(c => c.Id == address.Country.Id).FirstOrDefault();
+                country.Addresses.Add(address);
+                _countryRepository.Update(country);
+                #endregion Address
+                //end of register
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
