@@ -2,43 +2,56 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SnackExchange.Web.Data;
 using SnackExchange.Web.Models;
+using SnackExchange.Web.Models.Auth;
+using SnackExchange.Web.Repository;
 
 namespace SnackExchange.Web.Controllers
 {
     public class ExchangesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Exchange> _exchangeRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<AppUser> _userManager;
 
-        public ExchangesController(ApplicationDbContext context)
+        public ExchangesController(IRepository<Exchange> exchangeRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
-            _context = context;
+            _exchangeRepository = exchangeRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: Exchanges
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var applicationDbContext = _context.Exchanges.Include(e => e.Moderator).Include(e => e.Receiver).Include(e => e.Sender);
-            return View(await applicationDbContext.ToListAsync());
+            return View(_exchangeRepository.GetAll());
         }
 
+        //// GET: Exchanges
+        //[Authorize]
+        //public IActionResult MyExchanges()
+        //{
+        //    return View(_exchangeRepository.FindBy(p => p.Sender.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User)));
+        //}
+
         // GET: Exchanges/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [Authorize]
+        public IActionResult Details(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
+            IQueryable<Exchange> exchangeQuery = _exchangeRepository.FindBy(x => x.Id == id);
 
-            var exchange = await _context.Exchanges
-                .Include(e => e.Moderator)
-                .Include(e => e.Receiver)
-                .Include(e => e.Sender)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var exchange = exchangeQuery.FirstOrDefault();
             if (exchange == null)
             {
                 return NotFound();
@@ -48,59 +61,61 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Exchanges/Create
+        [Authorize]
         public IActionResult Create()
         {
-            ViewData["ModeratorId"] = new SelectList(_context.AppUsers, "Id", "Id");
-            ViewData["ReceiverId"] = new SelectList(_context.AppUsers, "Id", "Id");
-            ViewData["SenderId"] = new SelectList(_context.AppUsers, "Id", "Id");
             return View();
         }
 
+
         // POST: Exchanges/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // To protect from overexchangeing attacks, enable the specific properties you want to bind to, for
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SenderId,ReceiverId,ModeratorId,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber,Status,Id,CreatedAt,UpdatedAt")] Exchange exchange)
+        [Authorize]
+        public IActionResult Create([Bind("ExchangeNotes,PhotoUrl")] Exchange exchange)
         {
             if (ModelState.IsValid)
             {
-                exchange.Id = Guid.NewGuid();
-                _context.Add(exchange);
-                await _context.SaveChangesAsync();
+                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+                exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
+                exchange.SenderId = currentUserId;
+                exchange.Receiver = null;
+                exchange.ReceiverId = String.Empty;
+                exchange.Moderator = null;
+                exchange.ModeratorId = String.Empty;
+                exchange.ModeratorNotes = String.Empty;
+                exchange.TrackingNumber = String.Empty;
+                //exchange.Status = exchange.Exchange;
+                _exchangeRepository.Insert(exchange);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ModeratorId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ModeratorId);
-            ViewData["ReceiverId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ReceiverId);
-            ViewData["SenderId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.SenderId);
             return View(exchange);
         }
 
         // GET: Exchanges/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        public IActionResult Edit(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
 
-            var exchange = await _context.Exchanges.FindAsync(id);
+            var exchange = _exchangeRepository.GetById(id);
             if (exchange == null)
             {
                 return NotFound();
             }
-            ViewData["ModeratorId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ModeratorId);
-            ViewData["ReceiverId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ReceiverId);
-            ViewData["SenderId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.SenderId);
             return View(exchange);
         }
 
         // POST: Exchanges/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // To protect from overexchangeing attacks, enable the specific properties you want to bind to, for
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("SenderId,ReceiverId,ModeratorId,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber,Status,Id,CreatedAt,UpdatedAt")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("ExchangeNotes,PhotoUrl")] Exchange exchange)
         {
             if (id != exchange.Id)
             {
@@ -111,8 +126,10 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    _context.Update(exchange);
-                    await _context.SaveChangesAsync();
+                    var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+                    exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
+                    exchange.SenderId = currentUserId;
+                    _exchangeRepository.Update(exchange);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -127,26 +144,19 @@ namespace SnackExchange.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ModeratorId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ModeratorId);
-            ViewData["ReceiverId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.ReceiverId);
-            ViewData["SenderId"] = new SelectList(_context.AppUsers, "Id", "Id", exchange.SenderId);
             return View(exchange);
         }
 
         // GET: Exchanges/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [Authorize]
+        public IActionResult Delete(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
-
-            var exchange = await _context.Exchanges
-                .Include(e => e.Moderator)
-                .Include(e => e.Receiver)
-                .Include(e => e.Sender)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (exchange == null)
+            var exchange = _exchangeRepository.GetById(id);
+            if (exchange == null || _userManager.GetUserId(_httpContextAccessor.HttpContext.User) != exchange.Sender.Id)
             {
                 return NotFound();
             }
@@ -157,17 +167,40 @@ namespace SnackExchange.Web.Controllers
         // POST: Exchanges/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        [Authorize]
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var exchange = await _context.Exchanges.FindAsync(id);
-            _context.Exchanges.Remove(exchange);
-            await _context.SaveChangesAsync();
+            _exchangeRepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ExchangeExists(Guid id)
         {
-            return _context.Exchanges.Any(e => e.Id == id);
+            var exchange = _exchangeRepository.GetById(id);
+            return exchange != null;
+        }
+
+        public IActionResult AddSender(Exchange exchange, AppUser user)
+        {
+            exchange.Sender = user;
+            exchange.SenderId = user.Id;
+            return View(exchange);
+        }
+        public IActionResult AddModerator(Exchange exchange, AppUser user)
+        {
+            exchange.Moderator = user;
+            exchange.ModeratorId = user.Id;
+            return View(exchange);
+        }
+        public IActionResult AddModeratorNotes(Exchange exchange, String notes)
+        {
+            exchange.ModeratorNotes = notes;
+            return View(exchange);
+        }
+        public IActionResult AddTrackingNumber(Exchange exchange, String trackingNumber)
+        {
+            exchange.TrackingNumber = trackingNumber;
+            return View(exchange);
         }
     }
 }
