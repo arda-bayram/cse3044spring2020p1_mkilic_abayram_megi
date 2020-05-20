@@ -32,14 +32,14 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
-            //IRepository<Country> countryRepository)
+            IEmailSender emailSender,
+            IRepository<Country> countryRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
-            //_countryRepository = countryRepository;
+            _countryRepository = countryRepository;
         }
 
         [BindProperty]
@@ -110,16 +110,37 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new AppUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName = Input.LastName, 
-                    CountryCode = Input.CountryCode};
+
                 var country = new Country { Name = Input.Country, Currency = Input.Currency, Code = Input.CountryCode };
-                user.Country = country;
-               // country.Users.Add(user);
+
+                var countries = _countryRepository.FindBy(c => c.Name == country.Name);
+                var previousCountry = countries.FirstOrDefault();
+
+                if (previousCountry != null)
+                {
+                    country = previousCountry;
+                    _logger.LogInformation("Country already exists in database.");
+                }
+                else
+                {
+                    _countryRepository.Insert(country);
+                    _logger.LogInformation("Country added to database.");
+                }
+
+                var user = new AppUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    Country = country,
+                    IsModerator = false,
+                    CountryCode = country.Code,
+                    UserStatus = UserStatus.Active
+                };
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
-                //_countryRepository.Insert(country);
-                //countryi table'a eklemiyoruz ama bir country idsi oluşuyor bunu kullanarak countryyi ekleyebiliriz belki
-                //User'ın statusunu belirlemiyor bunu da ayarlamalıyız
-                
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
@@ -134,7 +155,7 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                    
+
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email });
