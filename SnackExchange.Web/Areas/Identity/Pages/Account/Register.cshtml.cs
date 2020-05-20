@@ -13,7 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using SnackExchange.Web.Models;
 using SnackExchange.Web.Models.Auth;
+using SnackExchange.Web.Repository;
 
 namespace SnackExchange.Web.Areas.Identity.Pages.Account
 {
@@ -24,17 +26,20 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IRepository<Country> _countryRepository;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
+            //IRepository<Country> countryRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            //_countryRepository = countryRepository;
         }
 
         [BindProperty]
@@ -61,6 +66,36 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "First Name")]
+            public string FirstName { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Last Name")]
+            public string LastName { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Country")]
+            public string Country { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Country Code")]
+            public string CountryCode { get; set; }
+
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Currency")]
+            public string Currency { get; set; }
+
+            //[Required]
+            //[DataType(DataType.Text)]
+            //[Display(Name = "Address")]
+            //public Address Address { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -75,8 +110,16 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new AppUser { UserName = Input.Email, Email = Input.Email };
+                var user = new AppUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName = Input.LastName, 
+                    CountryCode = Input.CountryCode};
+                var country = new Country { Name = Input.Country, Currency = Input.Currency, Code = Input.CountryCode };
+                user.Country = country;
+               // country.Users.Add(user);
                 var result = await _userManager.CreateAsync(user, Input.Password);
+                //_countryRepository.Insert(country);
+                //countryi table'a eklemiyoruz ama bir country idsi oluşuyor bunu kullanarak countryyi ekleyebiliriz belki
+                //User'ın statusunu belirlemiyor bunu da ayarlamalıyız
+                
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
@@ -91,7 +134,7 @@ namespace SnackExchange.Web.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+                    
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email });
