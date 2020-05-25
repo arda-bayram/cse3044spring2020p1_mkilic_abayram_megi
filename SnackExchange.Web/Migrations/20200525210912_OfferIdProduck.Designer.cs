@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SnackExchange.Web.Data;
 
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200525210912_OfferIdProduck")]
+    partial class OfferIdProduck
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -446,7 +448,7 @@ namespace SnackExchange.Web.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("OfferId")
+                    b.Property<Guid>("OfferId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("OriginCountryId")
@@ -612,7 +614,9 @@ namespace SnackExchange.Web.Migrations
 
                     b.HasOne("SnackExchange.Web.Models.Offer", "Offer")
                         .WithMany("Products")
-                        .HasForeignKey("OfferId");
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SnackExchange.Web.Models.Country", "OriginCountry")
                         .WithMany()

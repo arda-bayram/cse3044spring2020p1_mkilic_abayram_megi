@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SnackExchange.Web.Data;
 
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200525200330_ImproveExchangeOffer")]
+    partial class ImproveExchangeOffer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,7 +375,7 @@ namespace SnackExchange.Web.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ExchangeId")
+                    b.Property<Guid?>("ExchangeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("OfferNotes")
@@ -588,9 +590,7 @@ namespace SnackExchange.Web.Migrations
                 {
                     b.HasOne("SnackExchange.Web.Models.Exchange", "Exchange")
                         .WithMany("Offers")
-                        .HasForeignKey("ExchangeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ExchangeId");
 
                     b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "Offerer")
                         .WithMany()

@@ -78,15 +78,15 @@
     @if (User.Identity.Name != Model.Sender.Email)
     {
         <div>
-            <input type="button" value="Offer" class="btn btn-danger" id="btnOffer" />
+            <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer</a>
         </div>
 
     }
     else
     {
         <hr />
-        <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a> 
-        <a asp-action = "Index" > Back to List</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
+        <a asp-action="Index"> Back to List</a>
     }
 
 

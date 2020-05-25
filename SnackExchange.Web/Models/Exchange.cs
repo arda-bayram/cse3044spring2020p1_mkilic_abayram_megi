@@ -27,6 +27,7 @@ namespace SnackExchange.Web.Models
         public virtual AppUser Moderator { get; set; }
         public ExchangeStatus? Status { get;  set; } = ExchangeStatus.None;
         public virtual List<Product> Products { get; set; }
+        public virtual List<Offer> Offers { get; set; }
     }
 
     public enum ExchangeStatus

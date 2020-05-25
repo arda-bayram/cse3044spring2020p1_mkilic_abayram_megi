@@ -20,6 +20,7 @@ namespace SnackExchange.Web.Data
         {
             base.OnModelCreating(builder);
             builder.Entity<Exchange>().Property(t => t.Id).ValueGeneratedOnAdd();
+            builder.Entity<Offer>().Property(t => t.Id).ValueGeneratedOnAdd();
             builder.Entity<Product>().Property(t => t.Id).ValueGeneratedOnAdd();
         }
 
@@ -29,5 +30,6 @@ namespace SnackExchange.Web.Data
         public DbSet<Exchange> Exchanges { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<SnackExchange.Web.Models.Offer> Offer { get; set; }
     }
 }
