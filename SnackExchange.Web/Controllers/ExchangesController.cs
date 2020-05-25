@@ -93,6 +93,7 @@ namespace SnackExchange.Web.Controllers
                 exchange.Status = ExchangeStatus.Created;
                 _exchangeRepository.Insert(exchange);
 
+
                 var user = exchange.Sender;
                 var exchangeUserModel = new ExchangeUserModel
                 {
@@ -221,12 +222,6 @@ namespace SnackExchange.Web.Controllers
             return View(exchange);
         }
 
-        // GET: Products/Create
-        public IActionResult CreateProduct()
-        {
-            return View("Products");
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateProduct([Bind("Name,Description,Price")] Product product)
@@ -234,9 +229,8 @@ namespace SnackExchange.Web.Controllers
             if (ModelState.IsValid)
             {
                 _productRepository.Insert(product);
-                return PartialView("Products", product);
             }
-            return View("Products",product);
+            return PartialView("_Product",product);
         }
     }
 }
