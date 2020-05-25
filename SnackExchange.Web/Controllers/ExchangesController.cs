@@ -21,17 +21,20 @@ namespace SnackExchange.Web.Controllers
         private readonly IRepository<ExchangeUserModel> _exchangeUserModelRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IRepository<Product> _productRepository;
 
         public ExchangesController(
             IRepository<Exchange> exchangeRepository,
             IRepository<ExchangeUserModel> exchangeUserModelRepository,
             IHttpContextAccessor httpContextAccessor,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            IRepository<Product> productRepository)
         {
             _exchangeRepository = exchangeRepository;
             _exchangeUserModelRepository = exchangeUserModelRepository;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
+            _productRepository = productRepository;
         }
 
         // GET: Exchanges
@@ -216,6 +219,24 @@ namespace SnackExchange.Web.Controllers
             exchange.TrackingNumber = trackingNumber;
             exchange.Status = ExchangeStatus.OnAir;
             return View(exchange);
+        }
+
+        // GET: Products/Create
+        public IActionResult CreateProduct()
+        {
+            return View("Products");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateProduct([Bind("Name,Description,Price")] Product product)
+        {
+            if (ModelState.IsValid)
+            {
+                _productRepository.Insert(product);
+                return PartialView("Products", product);
+            }
+            return View("Products",product);
         }
     }
 }
