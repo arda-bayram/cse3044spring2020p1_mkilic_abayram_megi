@@ -93,6 +93,7 @@ namespace SnackExchange.Web.Controllers
                 exchange.Status = ExchangeStatus.Created;
                 _exchangeRepository.Insert(exchange);
 
+                //foreach()
 
                 var user = exchange.Sender;
                 var exchangeUserModel = new ExchangeUserModel
@@ -228,7 +229,10 @@ namespace SnackExchange.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _productRepository.Insert(product);
+                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+                product.OriginCountry = _userManager.FindByIdAsync(currentUserId).Result.Country;
+                //product.Exchange
+                //_productRepository.Insert(product);
             }
             return PartialView("_Product",product);
         }

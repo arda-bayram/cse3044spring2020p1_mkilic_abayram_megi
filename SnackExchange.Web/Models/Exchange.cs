@@ -8,16 +8,13 @@ using System.Threading.Tasks;
 
 namespace SnackExchange.Web.Models
 {
-    //enum ExchangeStatus
-    //{
-    //    Active,
-    //    Inactive,
-    //    OnProcess,
-    //    Reported
-    //}
 
     public class Exchange : BaseEntity
     {
+        public Exchange()
+        {
+
+        }
         public string SenderId { get; set; }
         public string? ReceiverId { get; set; }
         public string? ModeratorId { get; set; }
