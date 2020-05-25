@@ -94,15 +94,9 @@ namespace SnackExchange.Web.Controllers
                 exchange.SenderId = currentUserId;
                 exchange.Status = ExchangeStatus.Created;
 
-                foreach (var p in exchange.Products)
-                {
-                    if (!string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price))
-                    {
-                        _productRepository.Insert(p);
-                    }
-                }
+                exchange.Products = exchange.Products.Where(p => !string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price)).ToList();
 
-                _exchangeRepository.Insert(exchange); // CHECK: insert yerine update olabilir
+                _exchangeRepository.Insert(exchange);
 
                 //foreach()
 
