@@ -18,12 +18,18 @@ namespace SnackExchange.Web.Controllers
     public class ExchangesController : Controller
     {
         private readonly IRepository<Exchange> _exchangeRepository;
+        private readonly IRepository<ExchangeUserModel> _exchangeUserModelRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
 
-        public ExchangesController(IRepository<Exchange> exchangeRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
+        public ExchangesController(
+            IRepository<Exchange> exchangeRepository,
+            IRepository<ExchangeUserModel> exchangeUserModelRepository,
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<AppUser> userManager)
         {
             _exchangeRepository = exchangeRepository;
+            _exchangeUserModelRepository = exchangeUserModelRepository;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
         }
@@ -82,13 +88,24 @@ namespace SnackExchange.Web.Controllers
                 exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
                 exchange.SenderId = currentUserId;
                 exchange.Receiver = null;
-                exchange.ReceiverId = String.Empty;
                 exchange.Moderator = null;
-                exchange.ModeratorId = String.Empty;
                 exchange.ModeratorNotes = String.Empty;
                 exchange.TrackingNumber = String.Empty;
                 exchange.Status = ExchangeStatus.Created;
                 _exchangeRepository.Insert(exchange);
+
+                var user = exchange.Sender;
+                var exchangeUserModel = new ExchangeUserModel
+                {
+                    UserExchangeRole = UserExchangeRole.Sender,
+                    Exchange = exchange,
+                    UpdatedAt = DateTime.Now
+                };
+
+                _exchangeUserModelRepository.Insert(exchangeUserModel);
+                user.Exchanges.Add(exchangeUserModel);
+                _userManager.UpdateAsync(user);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(exchange);

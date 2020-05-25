@@ -10,6 +10,8 @@
     <Compile Remove="Migrations\20200520140234_UpdateCountryModel.Designer.cs" />
     <Compile Remove="Migrations\20200520194722_UpdateExchangeEnum.cs" />
     <Compile Remove="Migrations\20200520194722_UpdateExchangeEnum.Designer.cs" />
+    <Compile Remove="Migrations\20200525100745_IdsNullable.cs" />
+    <Compile Remove="Migrations\20200525100745_IdsNullable.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,9 +29,7 @@ namespace SnackExchange.Web.Models.Auth
     }
     public class ExchangeUserModel : BaseEntity
     {
-
-        [EnumDataType(typeof(UserExchangeRole))]
-        public UserExchangeRole UserExchangeRole { get; set; }
+        public UserExchangeRole? UserExchangeRole { get; set; }
 
         public virtual Exchange Exchange { get; set; }
 
