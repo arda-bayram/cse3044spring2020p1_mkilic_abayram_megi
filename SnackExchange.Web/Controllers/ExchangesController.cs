@@ -93,8 +93,14 @@ namespace SnackExchange.Web.Controllers
                 exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
                 exchange.SenderId = currentUserId;
                 exchange.Status = ExchangeStatus.Created;
-
+                
                 exchange.Products = exchange.Products.Where(p => !string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price)).ToList();
+               
+
+                foreach(Product p in exchange.Products)
+                {
+                    p.OriginCountry = exchange.Sender.Country;
+                }
 
                 _exchangeRepository.Insert(exchange);
 
