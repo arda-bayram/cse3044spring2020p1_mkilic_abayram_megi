@@ -85,7 +85,7 @@ namespace SnackExchange.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public IActionResult Create([Bind("ExchangeNotes,PhotoUrl")] Exchange exchange)
+        public IActionResult Create([Bind("ExchangeNotes,PhotoUrl,Products")] Exchange exchange)
         {
             if (ModelState.IsValid)
             {
@@ -93,7 +93,16 @@ namespace SnackExchange.Web.Controllers
                 exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
                 exchange.SenderId = currentUserId;
                 exchange.Status = ExchangeStatus.Created;
-                _exchangeRepository.Update(exchange);
+
+                foreach (var p in exchange.Products)
+                {
+                    if (!string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price))
+                    {
+                        _productRepository.Insert(p);
+                    }
+                }
+
+                _exchangeRepository.Insert(exchange); // CHECK: insert yerine update olabilir
 
                 //foreach()
 
@@ -120,7 +129,7 @@ namespace SnackExchange.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _productRepository.Insert(exchange.Products.Last());
+                //_productRepository.Insert(exchange.Products.Last());
                 exchange.Products.Add(new Product());
             }
             return PartialView("Products", exchange);
