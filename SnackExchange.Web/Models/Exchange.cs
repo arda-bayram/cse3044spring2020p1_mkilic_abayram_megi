@@ -13,7 +13,7 @@ namespace SnackExchange.Web.Models
     {
         public Exchange()
         {
-
+            Products = new List<Product>();
         }
         public string SenderId { get; set; }
         public string? ReceiverId { get; set; }

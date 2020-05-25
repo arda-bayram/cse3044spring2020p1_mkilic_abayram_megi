@@ -73,7 +73,9 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            return View();
+            var model = new Exchange();
+            model.Products.Add(new Product());
+            return View(model);
         }
 
 
@@ -91,7 +93,7 @@ namespace SnackExchange.Web.Controllers
                 exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
                 exchange.SenderId = currentUserId;
                 exchange.Status = ExchangeStatus.Created;
-                _exchangeRepository.Insert(exchange);
+                _exchangeRepository.Update(exchange);
 
                 //foreach()
 
@@ -111,6 +113,19 @@ namespace SnackExchange.Web.Controllers
             }
             return View(exchange);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateProduct([Bind("Products")] Exchange exchange)
+        {
+            if (ModelState.IsValid)
+            {
+                _productRepository.Insert(exchange.Products.Last());
+                exchange.Products.Add(new Product());
+            }
+            return PartialView("Products", exchange);
+        }
+
 
         // GET: Exchanges/Edit/5
         public IActionResult Edit(Guid id)
@@ -223,18 +238,6 @@ namespace SnackExchange.Web.Controllers
             return View(exchange);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CreateProduct([Bind("Name,Description,Price")] Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                product.OriginCountry = _userManager.FindByIdAsync(currentUserId).Result.Country;
-                //product.Exchange
-                //_productRepository.Insert(product);
-            }
-            return PartialView("_Product",product);
-        }
+
     }
 }
