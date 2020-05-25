@@ -87,10 +87,6 @@ namespace SnackExchange.Web.Controllers
                 var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
                 exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
                 exchange.SenderId = currentUserId;
-                exchange.Receiver = null;
-                exchange.Moderator = null;
-                exchange.ModeratorNotes = String.Empty;
-                exchange.TrackingNumber = String.Empty;
                 exchange.Status = ExchangeStatus.Created;
                 _exchangeRepository.Insert(exchange);
 
