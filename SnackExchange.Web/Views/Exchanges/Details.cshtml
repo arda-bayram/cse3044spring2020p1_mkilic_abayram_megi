@@ -192,9 +192,9 @@
                                 <td class="col-sm-2">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
                                 </td>
-                                <td class="col-sm-2">
+                                @*<td class="col-sm-2">
                                     @Html.Raw("Show")
-                                </td>
+                                </td>*@
                             </tr>
                         }
                     }
@@ -211,13 +211,13 @@
                                 @Html.DisplayFor(model => model.Offers[i].Status)
                             </td>
                             <td class="col-sm-2">
-                                @Html.Raw("Show")
+                                <input type="button" value="Show" class="btn btn-info" id="btnShow" />
                             </td>
                             <td class="col-sm-2">
-                                @Html.Raw("Accept")
+                                <input type="button" value="Accept" class="btn btn-success" id="btnAccept" />
                             </td>
                             <td class="col-sm-2">
-                                @Html.Raw("Reject")
+                                <input type="button" value="Reject" class="btn btn-danger" id="btnReject" />
                             </td>
                         </tr>
                     }

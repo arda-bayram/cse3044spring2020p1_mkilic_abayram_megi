@@ -39,9 +39,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.CreatedAt)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -61,22 +58,19 @@
                 @Html.DisplayFor(modelItem => item.TrackingNumber)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Sender.Id)
+                @Html.DisplayFor(modelItem => item.Sender.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Receiver.Id)
+                @Html.DisplayFor(modelItem => item.Receiver.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Moderator.Id)
+                @Html.DisplayFor(modelItem => item.Moderator.Email)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Status)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

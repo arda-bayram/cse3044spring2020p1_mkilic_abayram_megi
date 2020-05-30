@@ -21,7 +21,7 @@ namespace SnackExchange.Web.Controllers
         private readonly IRepository<ExchangeUserModel> _exchangeUserModelRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Product> _productRepository;   
 
         public ExchangesController(
             IRepository<Exchange> exchangeRepository,

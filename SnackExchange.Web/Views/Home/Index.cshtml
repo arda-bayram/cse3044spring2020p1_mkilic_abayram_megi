@@ -1,8 +1,87 @@
-﻿@{
+﻿@model IEnumerable<SnackExchange.Web.Models.Offer>
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
+
+@{
     ViewData["Title"] = "Home Page";
+
+    SnackExchange.Web.Models.Auth.AppUser user = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        user = userManager.FindByNameAsync(User.Identity.Name).Result;
+    }
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+
+
+@if (Model != null && Model.Count() > 0)
+{
+    <h1>My Offers</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Offerer)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OfferNotes)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PhotoUrl)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Status)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CreatedAt)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Offerer.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OfferNotes)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PhotoUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedAt)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        @if (item.Status == OfferStatus.Created || item.Status == OfferStatus.Waiting)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        }
+
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    @if (User.Identity.IsAuthenticated)
+    {
+        @Html.Raw("<h1>You have no offer</h1>")
+    }
+    else
+    {
+        @Html.Raw("<h1>Register or Login</h1>")
+    }
+}
+
+

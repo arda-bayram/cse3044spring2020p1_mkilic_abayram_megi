@@ -1,7 +1,14 @@
 ﻿@model IEnumerable<SnackExchange.Web.Models.Offer>
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
     ViewData["Title"] = "Index";
+
+    SnackExchange.Web.Models.Auth.AppUser user = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        user = userManager.FindByNameAsync(User.Identity.Name).Result;
+    }
 }
 
 <h1>Index</h1>
@@ -34,32 +41,36 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Offerer.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OfferNotes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhotoUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Offerer.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OfferNotes)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhotoUrl)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAt)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UpdatedAt)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if (user.Email == item.Offerer.Email && (item.Status == OfferStatus.Created || item.Status == OfferStatus.Waiting))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id"> Delete</a>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
