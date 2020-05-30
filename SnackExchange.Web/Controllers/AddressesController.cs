@@ -29,6 +29,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Addresses
+        [Authorize]
         public IActionResult Index()
         {
             return View(_addressRepository.GetAll());
@@ -38,7 +39,9 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult MyAddresses()
         {
-            return View(_addressRepository.FindBy(p => p.User.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User)));
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            var myAddress = _addressRepository.FindBy(p => p.User.Id == user.Id);
+            return View(user);
         }
 
         // GET: Addresses/Details/5
@@ -64,6 +67,11 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Create()
         {
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
+            }
             return View();
         }
 
@@ -76,11 +84,15 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Create([Bind("Id,Title,Text,PlusCode")] Address address)
         {
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
+            }
             if (ModelState.IsValid)
             {
-                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                address.User = _userManager.FindByIdAsync(currentUserId).Result; // current user
-                address.UserId = currentUserId;
+                address.User = user; // current user
+                address.UserId = user.Id;
                 address.Country = address.User.Country;
                 _addressRepository.Insert(address);
                 return RedirectToAction(nameof(Index));
@@ -94,6 +106,11 @@ namespace SnackExchange.Web.Controllers
             if (id == Guid.Empty)
             {
                 return NotFound();
+            }
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
             }
 
             var address = _addressRepository.GetById(id);
@@ -114,6 +131,11 @@ namespace SnackExchange.Web.Controllers
             if (id != address.Id)
             {
                 return NotFound();
+            }
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -150,6 +172,12 @@ namespace SnackExchange.Web.Controllers
             {
                 return NotFound();
             }
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             var address = _addressRepository.GetById(id);
             if (address == null || _userManager.GetUserId(_httpContextAccessor.HttpContext.User) != address.User.Id)
             {
@@ -165,6 +193,11 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult DeleteConfirmed(Guid id)
         {
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (!user.IsModerator)
+            {
+                return RedirectToAction(nameof(Index));
+            }
             _addressRepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }

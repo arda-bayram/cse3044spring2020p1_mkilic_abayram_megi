@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -25,12 +26,14 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries
+        [Authorize]
         public IActionResult Index()
         {
             return View(_countryRepository.GetAll());
         }
 
         // GET: Countries/Details/5
+        [Authorize]
         public IActionResult Details(Guid id)
         {
             if (id == Guid.Empty)
@@ -49,6 +52,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -60,6 +64,7 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult Create([Bind("Name,Currency,Code,Id")] Country country)
         {
             if (ModelState.IsValid)
@@ -71,6 +76,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries/Edit/5
+        [Authorize]
         public IActionResult Edit(Guid id)
         {
             if (id == Guid.Empty)
@@ -91,6 +97,7 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult Edit(Guid id, [Bind("Name,Currency,Code,Id")] Country country)
         {
             if (id != country.Id)
@@ -121,6 +128,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries/Delete/5
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             if (id == Guid.Empty)
@@ -139,6 +147,7 @@ namespace SnackExchange.Web.Controllers
         // POST: Countries/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult DeleteConfirmed(Guid id)
         {
             _countryRepository.Delete(id);
