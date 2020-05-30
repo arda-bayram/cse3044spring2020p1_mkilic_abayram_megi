@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SnackExchange.Web.Migrations
 {
-    public partial class InstallAll : Migration
+    public partial class InitSnackExchange : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,7 +30,7 @@ namespace SnackExchange.Web.Migrations
                     UpdatedAt = table.Column<DateTime>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Currency = table.Column<string>(nullable: true),
-                    Code = table.Column<int>(nullable: false)
+                    Code = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -225,7 +225,7 @@ namespace SnackExchange.Web.Migrations
                     ExchangeNotes = table.Column<string>(nullable: true),
                     PhotoUrl = table.Column<string>(nullable: true),
                     TrackingNumber = table.Column<string>(nullable: true),
-                    Status = table.Column<int>(nullable: false)
+                    Status = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -279,7 +279,7 @@ namespace SnackExchange.Web.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: false),
-                    UserExchangeRole = table.Column<int>(nullable: false),
+                    UserExchangeRole = table.Column<int>(nullable: true),
                     ExchangeId = table.Column<Guid>(nullable: true),
                     AppUserId = table.Column<string>(nullable: true)
                 },
@@ -301,6 +301,36 @@ namespace SnackExchange.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Offer",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false),
+                    ExchangeId = table.Column<Guid>(nullable: false),
+                    OffererId = table.Column<string>(nullable: true),
+                    OfferNotes = table.Column<string>(nullable: true),
+                    PhotoUrl = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Offer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Offer_Exchanges_ExchangeId",
+                        column: x => x.ExchangeId,
+                        principalTable: "Exchanges",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Offer_AspNetUsers_OffererId",
+                        column: x => x.OffererId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -311,7 +341,8 @@ namespace SnackExchange.Web.Migrations
                     Description = table.Column<string>(nullable: true),
                     Price = table.Column<string>(nullable: true),
                     OriginCountryId = table.Column<Guid>(nullable: true),
-                    ExchangeId = table.Column<Guid>(nullable: true)
+                    ExchangeId = table.Column<Guid>(nullable: true),
+                    OfferId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -320,6 +351,12 @@ namespace SnackExchange.Web.Migrations
                         name: "FK_Products_Exchanges_ExchangeId",
                         column: x => x.ExchangeId,
                         principalTable: "Exchanges",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Products_Offer_OfferId",
+                        column: x => x.OfferId,
+                        principalTable: "Offer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -410,6 +447,16 @@ namespace SnackExchange.Web.Migrations
                 column: "ExchangeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Offer_ExchangeId",
+                table: "Offer",
+                column: "ExchangeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Offer_OffererId",
+                table: "Offer",
+                column: "OffererId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_UserId",
                 table: "Posts",
                 column: "UserId");
@@ -418,6 +465,11 @@ namespace SnackExchange.Web.Migrations
                 name: "IX_Products_ExchangeId",
                 table: "Products",
                 column: "ExchangeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_OfferId",
+                table: "Products",
+                column: "OfferId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_OriginCountryId",
@@ -456,6 +508,9 @@ namespace SnackExchange.Web.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Offer");
 
             migrationBuilder.DropTable(
                 name: "Exchanges");

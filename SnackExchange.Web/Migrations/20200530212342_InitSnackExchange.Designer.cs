@@ -10,8 +10,8 @@ using SnackExchange.Web.Data;
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200525210912_OfferIdProduck")]
-    partial class OfferIdProduck
+    [Migration("20200530212342_InitSnackExchange")]
+    partial class InitSnackExchange
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -448,7 +448,7 @@ namespace SnackExchange.Web.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("OfferId")
+                    b.Property<Guid?>("OfferId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("OriginCountryId")
@@ -614,9 +614,7 @@ namespace SnackExchange.Web.Migrations
 
                     b.HasOne("SnackExchange.Web.Models.Offer", "Offer")
                         .WithMany("Products")
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OfferId");
 
                     b.HasOne("SnackExchange.Web.Models.Country", "OriginCountry")
                         .WithMany()
