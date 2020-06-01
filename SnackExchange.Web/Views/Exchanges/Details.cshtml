@@ -1,7 +1,9 @@
 ﻿@model SnackExchange.Web.Models.Exchange
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
     ViewData["Title"] = "Details";
+    var user = userManager.FindByNameAsync(User.Identity.Name).Result;
 }
 
 <h1>Details</h1>
@@ -10,69 +12,237 @@
     <h4>Exchange</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModeratorNotes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModeratorNotes)
-        </dd>
-        <dt class = "col-sm-2">
+
+        @if (user.IsModerator)
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ModeratorNotes)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ModeratorNotes)
+            </dd>
+        }
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ExchangeNotes)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ExchangeNotes)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhotoUrl)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PhotoUrl)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.TrackingNumber)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.TrackingNumber)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Sender)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sender.Id)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Sender.Email)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Receiver)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Receiver.Id)
-        </dd>
-        <dt class = "col-sm-2">
+        @if (Model.Receiver != null)
+        {
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Receiver.Email)
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-10">
+                @Html.Raw("<p> - </p>")
+            </dd>
+        }
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Moderator)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Moderator.Id)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Status)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Status)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
     </dl>
+
+    <br />
+    <h class="col-sm-2">
+        @Html.Raw("<h1><b>Products</b></h1>")
+    </h>
+    @if (Model.Products.Count < 0)
+    {
+        @Html.Raw("<h4>No products found!<h4>")
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Name)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Description)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Price)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Products.Count; i++)
+                {
+                    <tr>
+                        <td class="col-sm-2">
+                            @Html.DisplayFor(model => model.Products[i].Name)
+                        </td>
+                        <td class="col-sm-2">
+                            @Html.DisplayFor(model => model.Products[i].Description)
+                        </td>
+                        <td class="col-sm-2">
+                            @Html.DisplayFor(model => model.Products[i].Price)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <h class="col-sm-2">
+        @Html.Raw("<h1><b>Offers</b></h1>")
+    </h>
+    @if (Model.Offers.Count < 0)
+    {
+        @Html.Raw("<h4>No offers proposed yet!<h4>")
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Offers.First().Offerer.Email)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Offers.First().OfferNotes)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Offers.First().Status)
+                    </th>
+                    <td class="col-sm-2">
+                        @Html.Raw("Show")
+                    </td>
+
+                    @if (Model.Status == ExchangeStatus.Accepted)
+                    {
+                        <th class="col-sm-2">
+                            @Html.Raw("Accept")
+                        </th>
+                        <th class="col-sm-2">
+                            @Html.Raw("Reject")
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Offers.Count; i++)
+                {
+                    @if (Model.Status == ExchangeStatus.Accepted)
+                    {
+                        @if (Model.Offers[i].Status == OfferStatus.Accepted)
+                        {
+                            <tr>
+                                <td class="col-sm-2" style="color:green">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2" style="color:green">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2" style="color:green">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.Raw("Show")
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                @*<td class="col-sm-2">
+                                    @Html.Raw("Show")
+                                </td>*@
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Offers[i].Status)
+                            </td>
+                            <td class="col-sm-2">
+                                <input type="button" value="Show" class="btn btn-info" id="btnShow" />
+                            </td>
+                            <td class="col-sm-2">
+                                <input type="button" value="Accept" class="btn btn-success" id="btnAccept" />
+                            </td>
+                            <td class="col-sm-2">
+                                <input type="button" value="Reject" class="btn btn-danger" id="btnReject" />
+                            </td>
+                        </tr>
+                    }
+
+                }
+            </tbody>
+        </table>
+    }
+
+
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (user.Email != Model.Sender.Email)
+    {
+        <div>
+            <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer</a>
+        </div>
+
+    }
+    else
+    {
+        <hr />
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
+        <a asp-action="Index"> Back to List</a>
+    }
+
+
 </div>

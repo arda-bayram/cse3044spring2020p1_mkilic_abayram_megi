@@ -10,7 +10,7 @@ namespace SnackExchange.Web.Models
     {
         public string Name { get; set; }
         public string Currency { get; set; }
-        public int Code { get; set; }
+        public string Code { get; set; }
         public virtual List<Address> Addresses { get; set; }
         public virtual List<AppUser> Users { get; set; }
     }
