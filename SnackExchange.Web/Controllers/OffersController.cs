@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -39,12 +40,14 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Offers
+        [Authorize]
         public IActionResult Index()
         {
             return View(_offerRepository.GetAll());
         }
 
         // GET: Offers/Details/5
+        [Authorize]
         public IActionResult Details(Guid id)
         {
             if (id == Guid.Empty)
@@ -63,6 +66,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Offers/Create
+        [Authorize]
         public IActionResult Create(string Id)
         {
             var model = new Offer
@@ -74,10 +78,9 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Offers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult Create([Bind("OfferNotes,PhotoUrl,ExchangeId,Products")] Offer offer)
         {
             if (ModelState.IsValid)
@@ -104,6 +107,7 @@ namespace SnackExchange.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult CreateProduct([Bind("Products")] Offer offer)
         {
             if (ModelState.IsValid)
@@ -114,6 +118,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Offers/Edit/5
+        [Authorize]
         public IActionResult Edit(Guid? id)
         {
             if (id == Guid.Empty)
@@ -132,11 +137,10 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Offers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("OffererId,OfferNotes,PhotoUrl,Status,Id,CreatedAt,UpdatedAt")] Offer offer)
+        [Authorize]
+        public IActionResult Edit(Guid id, [Bind("Id,OfferNotes,PhotoUrl,Products")] Offer offer)
         {
 
             if (id != offer.Id)
@@ -148,10 +152,28 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                    offer.Offerer = _userManager.FindByIdAsync(currentUserId).Result; // current user
-                    offer.OffererId = currentUserId;
-                    _offerRepository.Update(offer);
+                    var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+                    var offerDb = _offerRepository.GetById(offer.Id);
+                    if (offerDb.OffererId == user.Id || user.IsModerator)
+                    {
+                        offerDb.OfferNotes = offer.OfferNotes;
+                        offerDb.PhotoUrl = offer.PhotoUrl;
+
+                        //TODO: not working right now
+                        foreach(var editProduct in offer.Products)
+                        {
+                            var oldProduct = offerDb.Products.Where(x => x.Id == editProduct.Id).FirstOrDefault();
+                            if (oldProduct != null)
+                            {
+                                offerDb.Products.Remove(oldProduct);
+                                offerDb.Products.Add(editProduct);
+                            }
+                        }
+
+                        offerDb.UpdatedAt = DateTime.Now;
+                        _offerRepository.Update(offerDb);
+                    }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -194,6 +216,7 @@ namespace SnackExchange.Web.Controllers
         // POST: Offers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var offer = await _context.Offer.FindAsync(id);

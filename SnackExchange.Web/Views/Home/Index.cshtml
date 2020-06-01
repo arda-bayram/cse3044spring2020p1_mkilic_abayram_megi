@@ -58,11 +58,11 @@
                         @Html.DisplayFor(modelItem => item.CreatedAt)
                     </td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Id">Details</a>
                         @if (item.Status == OfferStatus.Created || item.Status == OfferStatus.Waiting)
                         {
-                            <a asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            <a asp-controller="Offers" asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
+                            <a asp-controller="Offers" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                         }
 
 

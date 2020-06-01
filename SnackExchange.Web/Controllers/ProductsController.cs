@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SnackExchange.Web.Data;
 using SnackExchange.Web.Models;
+using SnackExchange.Web.Models.Auth;
 using SnackExchange.Web.Repository;
 
 namespace SnackExchange.Web.Controllers
@@ -16,20 +19,33 @@ namespace SnackExchange.Web.Controllers
     {
         private readonly IRepository<Product> _productRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<AppUser> _userManager;
 
-        public ProductsController(IRepository<Product> productRepository, IHttpContextAccessor httpContextAccessor)
+        public ProductsController(IRepository<Product> productRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
             _productRepository = productRepository;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: Products
+        [Authorize]
         public IActionResult Index()
         {
-            return View(_productRepository.GetAll());
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user.IsModerator)
+            {
+                return View(_productRepository.GetAll());
+            }
+            else
+            {
+                var myProducts = _productRepository.FindBy(p => p.Offer.Offerer.Id == user.Id);
+                return View(myProducts);
+            }
         }
 
         // GET: Products/Details/5
+        [Authorize]
         public IActionResult Details(Guid id)
         {
             if (id == Guid.Empty)
@@ -48,6 +64,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Products/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -59,6 +76,7 @@ namespace SnackExchange.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult Create([Bind("Name,Description,Price")] Product product)
         {
             if (ModelState.IsValid)
@@ -70,6 +88,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize]
         public IActionResult Edit(Guid id)
         {
             if (id == Guid.Empty)
@@ -86,8 +105,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Products/Edit/5
-        // To protect from overproducting attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Guid id, [Bind("Name,Description,Price")] Product product)
@@ -120,6 +138,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Products/Delete/5
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             if (id == Guid.Empty)
@@ -138,6 +157,7 @@ namespace SnackExchange.Web.Controllers
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult DeleteConfirmed(Guid id)
         {
             _productRepository.Delete(id);

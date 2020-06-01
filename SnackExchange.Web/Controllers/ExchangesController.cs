@@ -21,7 +21,7 @@ namespace SnackExchange.Web.Controllers
         private readonly IRepository<ExchangeUserModel> _exchangeUserModelRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IRepository<Product> _productRepository;   
+        private readonly IRepository<Product> _productRepository;
 
         public ExchangesController(
             IRepository<Exchange> exchangeRepository,
@@ -38,17 +38,21 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Exchanges
+        [Authorize]
         public IActionResult Index()
         {
-            return View(_exchangeRepository.GetAll());
-        }
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
+            {
+                return View(_exchangeRepository.GetAll());
+            }
+            else
+            {
+                var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
+                return View(myExchanges);
+            }
 
-        //// GET: Exchanges
-        //[Authorize]
-        //public IActionResult MyExchanges()
-        //{
-        //    return View(_exchangeRepository.FindBy(p => p.Sender.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User)));
-        //}
+        }
 
         // GET: Exchanges/Details/5
         [Authorize]
@@ -78,10 +82,6 @@ namespace SnackExchange.Web.Controllers
             return View(model);
         }
 
-
-        // POST: Exchanges/Create
-        // To protect from overexchangeing attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -152,11 +152,10 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Exchanges/Edit/5
-        // To protect from overexchangeing attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("ExchangeNotes,PhotoUrl")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("Id,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
         {
             if (id != exchange.Id)
             {
@@ -167,9 +166,10 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                    exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
-                    exchange.SenderId = currentUserId;
+                    var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+                    exchange.Sender = user;
+                    exchange.SenderId = user.Id;
+                    exchange.UpdatedAt = DateTime.Now;
                     _exchangeRepository.Update(exchange);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -187,6 +187,7 @@ namespace SnackExchange.Web.Controllers
             }
             return View(exchange);
         }
+
 
         // GET: Exchanges/Delete/5
         [Authorize]

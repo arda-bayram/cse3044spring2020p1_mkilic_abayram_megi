@@ -32,7 +32,17 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            return View(_addressRepository.GetAll());
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user.IsModerator)
+            {
+                return View(_addressRepository.GetAll());
+            }
+            else
+            {
+                var myAddresses = _addressRepository.FindBy(a => a.UserId == user.Id);
+                return View(myAddresses);
+            }
+
         }
 
         // GET: Addresses
@@ -146,6 +156,7 @@ namespace SnackExchange.Web.Controllers
                     address.User = _userManager.FindByIdAsync(currentUserId).Result; // current user
                     address.UserId = currentUserId;
                     address.Country = address.User.Country;
+                    address.UpdatedAt = DateTime.Now;
                     _addressRepository.Update(address);
                 }
                 catch (DbUpdateConcurrencyException)

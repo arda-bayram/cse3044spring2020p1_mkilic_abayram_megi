@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,18 +19,29 @@ namespace SnackExchange.Web.Controllers
     {
         private readonly IRepository<Country> _countryRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<AppUser> _userManager;
 
-        public CountriesController(IRepository<Country> countryRepository, IHttpContextAccessor httpContextAccessor)
+        public CountriesController(IRepository<Country> countryRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
             _countryRepository = countryRepository;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: Countries
         [Authorize]
         public IActionResult Index()
         {
-            return View(_countryRepository.GetAll());
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user.IsModerator)
+            {
+                return View(_countryRepository.GetAll());
+            }
+            else
+            {
+                var myCountry = _countryRepository.FindBy(c => c.Users.Contains(user));
+                return View(myCountry);
+            }
         }
 
         // GET: Countries/Details/5
@@ -60,8 +72,6 @@ namespace SnackExchange.Web.Controllers
 
 
         // POST: Countries/Create
-        // To protect from overcountrying attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -93,8 +103,6 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Countries/Edit/5
-        // To protect from overcountrying attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -109,6 +117,7 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
+                    country.UpdatedAt = DateTime.Now;
                     _countryRepository.Update(country);
                 }
                 catch (DbUpdateConcurrencyException)

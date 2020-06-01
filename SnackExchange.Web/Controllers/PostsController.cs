@@ -30,6 +30,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Posts
+        [Authorize]
         public IActionResult Index()
         {
             return View(_postRepository.GetAll());
