@@ -1,5 +1,6 @@
 ﻿@model SnackExchange.Web.Models.Exchange
 @inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
+@using System.Text.RegularExpressions;
 
 @{
     ViewData["Title"] = "Details";
@@ -88,50 +89,66 @@
     }
     else
     {
-<table class="table">
-    <thead>
-        <tr>
-            <th class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Products.First().Name)
-            </th>
-            <th class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Products.First().Description)
-            </th>
-            <th class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Products.First().Price)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Products.Count > 0)
-        {
-            int totalPrice = 0;
-            @for (var i = 0; i < Model.Products.Count; i++)
-            {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td class="col-sm-2">
-                        @Html.DisplayFor(model => model.Products[i].Name)
-                    </td>
-                    <td class="col-sm-2">
-                        @Html.DisplayFor(model => model.Products[i].Description)
-                    </td>
-                    <td class="col-sm-2">
-                        @Html.DisplayFor(model => model.Products[i].Price)
-                    </td>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Name)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Description)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Price)
+                    </th>
+                    <th></th>
                 </tr>
-                int price = Int16.Parse(Model.Products[i].Price);
-                totalPrice += price;
-            }
+            </thead>
+            <tbody>
+                @if (Model.Products.Count > 0)
+                {
+                    double totalPrice = 0;
+                    @for (var i = 0; i < Model.Products.Count; i++)
+                    {
+                        <tr>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Name)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Description)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Price)
+                            </td>
+                        </tr>
+                        var priceUnformatted = Model.Products[i].Price;
+                        double price;
+                        if (priceUnformatted.All(char.IsDigit))
+                        {
+                            price = Double.Parse(Model.Products[i].Price);
+                        }
+                        else
+                        {
+                            var dotIndex = -1;
+                            dotIndex = priceUnformatted.IndexOf(".");
+                            var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
+                            if(dotIndex != -1)
+                            {
+                                p.Insert(dotIndex, ".");
+                            }
+                            price = Double.Parse(p);
+                        }
+                        totalPrice += price;
+                    }
 
-        <div>
+                    <tr>
                         @Html.Raw("<b>Total Price = </b>" + totalPrice)
-        </div>
+                    </tr>
 
-    }
+                }
 
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     }
 
     <h class="col-sm-2">
