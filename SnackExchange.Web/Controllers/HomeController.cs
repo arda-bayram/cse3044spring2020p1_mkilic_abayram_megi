@@ -43,9 +43,7 @@ namespace SnackExchange.Web.Controllers
             {
                 var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
                 var exchanges = _exchangeRepository.GetAll();
-                var offers = exchanges.SelectMany(x => x.Offers);
-                var myOffers = offers.Where(x => x.OffererId == user.Id);
-                return View(myOffers);
+                return View(exchanges);
             }
             else
             {

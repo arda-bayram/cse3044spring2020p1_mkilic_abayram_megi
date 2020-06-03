@@ -43,7 +43,9 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            return View(_offerRepository.GetAll());
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            var myOffers = _offerRepository.FindBy(o => o.Offerer.Id == user.Id);
+            return View(myOffers);
         }
 
         // GET: Offers/Details/5

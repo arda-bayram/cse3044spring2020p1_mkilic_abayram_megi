@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SnackExchange.Web.Models.Offer>
+﻿@model IEnumerable<SnackExchange.Web.Models.Exchange>
 @inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
@@ -15,19 +15,28 @@
 
 @if (Model != null && Model.Count() > 0)
 {
-    <h1>My Offers</h1>
+    <h1>Exchange TimeLine</h1>
 
     <table class="table">
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Offerer)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.OfferNotes)
+                    @Html.DisplayNameFor(model => model.ExchangeNotes)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.PhotoUrl)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrackingNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Sender)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Receiver)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Moderator)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Status)
@@ -43,13 +52,22 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Offerer.Email)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.OfferNotes)
+                        @Html.DisplayFor(modelItem => item.ExchangeNotes)
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.PhotoUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TrackingNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Sender.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Receiver.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Moderator.Email)
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Status)
@@ -58,14 +76,9 @@
                         @Html.DisplayFor(modelItem => item.CreatedAt)
                     </td>
                     <td>
-                        <a asp-controller="Offers" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                        @if (item.Status == OfferStatus.Created || item.Status == OfferStatus.Waiting)
-                        {
-                            <a asp-controller="Offers" asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
-                            <a asp-controller="Offers" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        }
-
-
+                        <a asp-controller="Exchanges" asp-action="Edit" asp-route-id="@item.Id">Edit | </a>
+                        <a asp-controller="Exchanges" asp-action="Details" asp-route-id="@item.Id">Details | </a>
+                        <a asp-controller="Exchanges" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                     </td>
                 </tr>
             }
@@ -76,7 +89,7 @@ else
 {
     @if (User.Identity.IsAuthenticated)
     {
-        @Html.Raw("<h1>You have no offer</h1>")
+        @Html.Raw("<h1>There are no exchanges!</h1>")
     }
     else
     {
