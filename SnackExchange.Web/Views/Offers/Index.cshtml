@@ -60,11 +60,14 @@
                     @Html.DisplayFor(modelItem => item.UpdatedAt)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @*<a asp-action="Details" asp-route-id="@item.Id">Details</a>*@
+                    <button type="button" class="btn btn-info btn-sm" onclick="location.href='@Url.Action("Details", "Offers", item)'">Details</button>
                     @if (user.Email == item.Offerer.Email && (item.Status == OfferStatus.Created || item.Status == OfferStatus.Waiting))
                     {
-                        <a asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id"> Delete</a>
+                        @*<a asp-action="Edit" asp-route-id="@item.Id"> | Edit |</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id"> Delete</a>*@
+                        <button type="button" class="btn btn-warning btn-sm" onclick="location.href='@Url.Action("Edit", "Offers", item)'">Edit</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="location.href='@Url.Action("Delete", "Offers", item)'">Delete</button>
                     }
                 </td>
             </tr>

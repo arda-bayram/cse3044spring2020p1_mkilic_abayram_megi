@@ -76,9 +76,12 @@
                         @Html.DisplayFor(modelItem => item.CreatedAt)
                     </td>
                     <td>
-                        <a asp-controller="Exchanges" asp-action="Edit" asp-route-id="@item.Id">Edit | </a>
-                        <a asp-controller="Exchanges" asp-action="Details" asp-route-id="@item.Id">Details | </a>
-                        <a asp-controller="Exchanges" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <button type="button" class="btn btn-info btn-sm" onclick="location.href='@Url.Action("Details", "Exchanges", item)'">Details</button>
+                        <button type="button" class="btn btn-warning btn-sm" onclick="location.href='@Url.Action("Edit", "Exchanges", item)'">Edit</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
+                        @*<a asp-controller="Exchanges" asp-action="Edit" asp-route-id="@item.Id">Edit | </a>
+                            <a asp-controller="Exchanges" asp-action="Details" asp-route-id="@item.Id">Details | </a>
+                            <a asp-controller="Exchanges" asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
                     </td>
                 </tr>
             }

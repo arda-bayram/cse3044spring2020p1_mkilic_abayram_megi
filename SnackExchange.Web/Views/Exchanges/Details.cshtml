@@ -118,7 +118,7 @@
                                 @Html.DisplayFor(model => model.Products[i].Description)
                             </td>
                             <td class="col-sm-2">
-                                @Html.DisplayFor(model => model.Products[i].Price)
+                                @Html.DisplayFor(model => model.Products[i].Price) $
                             </td>
                         </tr>
                         var priceUnformatted = Model.Products[i].Price;
@@ -142,7 +142,7 @@
                     }
 
                     <tr>
-                        @Html.Raw("<b>Total Price = </b>" + totalPrice)
+                        @Html.Raw("<b>Total Price = </b>" + totalPrice + " $")
                     </tr>
 
                 }
@@ -265,16 +265,17 @@
 <div>
     @if (user.Email != Model.Sender.Email)
     {
-        <div>
-            <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer</a>
-        </div>
+    <div>
+        <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer</a>
+        <a asp-controller="Home" asp-action="Index"> | Back to List</a>
+    </div>
 
     }
     else
     {
         <hr />
         <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
-        <a asp-action="Index"> Back to List</a>
+        <a asp-controller="Home" asp-action="Index"> Back to List</a>
     }
 
 
