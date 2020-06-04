@@ -2,39 +2,59 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SnackExchange.Web.Data;
 using SnackExchange.Web.Models;
+using SnackExchange.Web.Models.Auth;
+using SnackExchange.Web.Repository;
 
 namespace SnackExchange.Web.Controllers
 {
     public class CountriesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Country> _countryRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<AppUser> _userManager;
 
-        public CountriesController(ApplicationDbContext context)
+        public CountriesController(IRepository<Country> countryRepository, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
-            _context = context;
+            _countryRepository = countryRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: Countries
-        public async Task<IActionResult> Index()
+        [Authorize]
+        public IActionResult Index()
         {
-            return View(await _context.Countries.ToListAsync());
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user.IsModerator)
+            {
+                return View(_countryRepository.GetAll());
+            }
+            else
+            {
+                var myCountry = _countryRepository.FindBy(c => c.Users.Contains(user));
+                return View(myCountry);
+            }
         }
 
         // GET: Countries/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [Authorize]
+        public IActionResult Details(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
+            IQueryable<Country> countryQuery = _countryRepository.FindBy(x => x.Id == id);
 
-            var country = await _context.Countries
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var country = countryQuery.FirstOrDefault();
             if (country == null)
             {
                 return NotFound();
@@ -44,37 +64,37 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
+
         // POST: Countries/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Currency,Code,Id,CreatedAt,UpdatedAt")] Country country)
+        [Authorize]
+        public IActionResult Create([Bind("Name,Currency,Code,Id")] Country country)
         {
             if (ModelState.IsValid)
             {
-                country.Id = Guid.NewGuid();
-                _context.Add(country);
-                await _context.SaveChangesAsync();
+                _countryRepository.Insert(country);
                 return RedirectToAction(nameof(Index));
             }
             return View(country);
         }
 
         // GET: Countries/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [Authorize]
+        public IActionResult Edit(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
 
-            var country = await _context.Countries.FindAsync(id);
+            var country = _countryRepository.GetById(id);
             if (country == null)
             {
                 return NotFound();
@@ -83,11 +103,10 @@ namespace SnackExchange.Web.Controllers
         }
 
         // POST: Countries/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Currency,Code,Id,CreatedAt,UpdatedAt")] Country country)
+        [Authorize]
+        public IActionResult Edit(Guid id, [Bind("Name,Currency,Code,Id")] Country country)
         {
             if (id != country.Id)
             {
@@ -98,8 +117,8 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
-                    _context.Update(country);
-                    await _context.SaveChangesAsync();
+                    country.UpdatedAt = DateTime.Now;
+                    _countryRepository.Update(country);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,15 +137,14 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Countries/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [Authorize]
+        public IActionResult Delete(Guid id)
         {
-            if (id == null)
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
-
-            var country = await _context.Countries
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var country = _countryRepository.GetById(id);
             if (country == null)
             {
                 return NotFound();
@@ -138,17 +156,29 @@ namespace SnackExchange.Web.Controllers
         // POST: Countries/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        [Authorize]
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var country = await _context.Countries.FindAsync(id);
-            _context.Countries.Remove(country);
-            await _context.SaveChangesAsync();
+            _countryRepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool CountryExists(Guid id)
         {
-            return _context.Countries.Any(e => e.Id == id);
+            var country = _countryRepository.GetById(id);
+            return country != null;
+        }
+
+        public IActionResult AddNewAddress(Country country, Address address)
+        {
+            country.Addresses.Add(address);
+            return View(country);
+        }
+
+        public IActionResult AddNewUser(Country country, AppUser user)
+        {
+            country.Users.Add(user);
+            return View(country);
         }
     }
 }

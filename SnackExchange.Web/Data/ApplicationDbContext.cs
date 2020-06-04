@@ -16,11 +16,20 @@ namespace SnackExchange.Web.Data
 
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.Entity<Exchange>().Property(t => t.Id).ValueGeneratedOnAdd();
+            builder.Entity<Offer>().Property(t => t.Id).ValueGeneratedOnAdd();
+            builder.Entity<Product>().Property(t => t.Id).ValueGeneratedOnAdd();
+        }
+
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Exchange> Exchanges { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<SnackExchange.Web.Models.Offer> Offer { get; set; }
     }
 }

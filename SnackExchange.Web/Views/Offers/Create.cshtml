@@ -1,4 +1,4 @@
-﻿@model SnackExchange.Web.Models.Exchange
+﻿@model SnackExchange.Web.Models.Offer
 
 @{
     ViewData["Title"] = "Create";
@@ -6,21 +6,26 @@
 
 <h1>Create</h1>
 
-<h4>Exchange</h4>
+<h4>Offer</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create" id="form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ExchangeNotes" class="control-label"></label>
-                <input asp-for="ExchangeNotes" class="form-control" />
-                <span asp-validation-for="ExchangeNotes" class="text-danger"></span>
+                <label asp-for="OfferNotes" class="control-label"></label>
+                <input asp-for="OfferNotes" class="form-control" />
+                <span asp-validation-for="OfferNotes" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PhotoUrl" class="control-label"></label>
                 <input asp-for="PhotoUrl" class="form-control" />
                 <span asp-validation-for="PhotoUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group" hidden>
+                <label asp-for="ExchangeId" class="control-label"></label>
+                <input asp-for="ExchangeId" class="form-control" />
+                <span asp-validation-for="ExchangeId" class="text-danger"></span>
             </div>
             <div id="orderItemsContainer">
                 @Html.EditorFor(model => model.Products)
@@ -37,6 +42,10 @@
     </div>
 </div>
 
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script type="text/javascript">
@@ -45,7 +54,7 @@
                 async: true,
                 data: $('#form').serialize(),
                 type: "POST",
-                url: '/Exchanges/CreateProduct',
+                url: '/Offers/CreateProduct',
                 success: function (partialView) {
                     console.log("partialView: "+partialView);
                     $('#orderItemsContainer').html(partialView);
@@ -54,5 +63,3 @@
         });
     </script>
 }
-
-

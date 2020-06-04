@@ -30,6 +30,7 @@ namespace SnackExchange.Web.Controllers
         }
 
         // GET: Posts
+        [Authorize]
         public IActionResult Index()
         {
             return View(_postRepository.GetAll());
@@ -120,6 +121,9 @@ namespace SnackExchange.Web.Controllers
             {
                 try
                 {
+                    var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+                    post.User = _userManager.FindByIdAsync(currentUserId).Result; // current user
+                    post.UserId = currentUserId;
                     _postRepository.Update(post);
                 }
                 catch (DbUpdateConcurrencyException)

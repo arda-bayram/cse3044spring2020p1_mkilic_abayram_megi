@@ -1,0 +1,127 @@
+﻿@model SnackExchange.Web.Models.Offer
+@using System.Text.RegularExpressions;
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Offer</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Offerer)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Offerer.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OfferNotes)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OfferNotes)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PhotoUrl)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PhotoUrl)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreatedAt)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreatedAt)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.UpdatedAt)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.UpdatedAt)
+        </dd>
+    </dl>
+
+    <br />
+    <h class="col-sm-2">
+        @Html.Raw("<h1><b>Products</b></h1>")
+    </h>
+    @if (Model.Products.Count < 0)
+    {
+        @Html.Raw("<h4>No products found!<h4>")
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Name)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Description)
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Products.First().Price)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Products.Count > 0)
+                {
+                    double totalPrice = 0;
+                    @for (var i = 0; i < Model.Products.Count; i++)
+                    {
+                        <tr>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Name)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Description)
+                            </td>
+                            <td class="col-sm-2">
+                                @Html.DisplayFor(model => model.Products[i].Price) $ 
+                            </td>
+                        </tr>
+                        var priceUnformatted = Model.Products[i].Price;
+                        double price;
+                        if (priceUnformatted.All(char.IsDigit))
+                        {
+                            price = Double.Parse(Model.Products[i].Price);
+                        }
+                        else
+                        {
+                            var dotIndex = -1;
+                            dotIndex = priceUnformatted.IndexOf(".");
+                            var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
+                            if (dotIndex != -1)
+                            {
+                                p.Insert(dotIndex, ".");
+                            }
+                            price = Double.Parse(p);
+                        }
+                        totalPrice += price;
+                    }
+
+                    <tr>
+                        @Html.Raw("<b>Total Price = </b>" + totalPrice + " $")
+                    </tr>
+
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

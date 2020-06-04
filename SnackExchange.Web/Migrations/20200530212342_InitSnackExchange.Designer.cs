@@ -10,8 +10,8 @@ using SnackExchange.Web.Data;
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200519124648_InstallAll")]
-    partial class InstallAll
+    [Migration("20200530212342_InitSnackExchange")]
+    partial class InitSnackExchange
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -281,7 +281,7 @@ namespace SnackExchange.Web.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserExchangeRole")
+                    b.Property<int?>("UserExchangeRole")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -299,8 +299,8 @@ namespace SnackExchange.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Code")
-                        .HasColumnType("int");
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -346,7 +346,7 @@ namespace SnackExchange.Web.Migrations
                     b.Property<string>("SenderId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Status")
+                    b.Property<int?>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("TrackingNumber")
@@ -364,6 +364,42 @@ namespace SnackExchange.Web.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Exchanges");
+                });
+
+            modelBuilder.Entity("SnackExchange.Web.Models.Offer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ExchangeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OfferNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OffererId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExchangeId");
+
+                    b.HasIndex("OffererId");
+
+                    b.ToTable("Offer");
                 });
 
             modelBuilder.Entity("SnackExchange.Web.Models.Post", b =>
@@ -412,6 +448,9 @@ namespace SnackExchange.Web.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("OfferId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("OriginCountryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -424,6 +463,8 @@ namespace SnackExchange.Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExchangeId");
+
+                    b.HasIndex("OfferId");
 
                     b.HasIndex("OriginCountryId");
 
@@ -545,6 +586,19 @@ namespace SnackExchange.Web.Migrations
                         .HasForeignKey("SenderId");
                 });
 
+            modelBuilder.Entity("SnackExchange.Web.Models.Offer", b =>
+                {
+                    b.HasOne("SnackExchange.Web.Models.Exchange", "Exchange")
+                        .WithMany("Offers")
+                        .HasForeignKey("ExchangeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "Offerer")
+                        .WithMany()
+                        .HasForeignKey("OffererId");
+                });
+
             modelBuilder.Entity("SnackExchange.Web.Models.Post", b =>
                 {
                     b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "User")
@@ -557,6 +611,10 @@ namespace SnackExchange.Web.Migrations
                     b.HasOne("SnackExchange.Web.Models.Exchange", "Exchange")
                         .WithMany("Products")
                         .HasForeignKey("ExchangeId");
+
+                    b.HasOne("SnackExchange.Web.Models.Offer", "Offer")
+                        .WithMany("Products")
+                        .HasForeignKey("OfferId");
 
                     b.HasOne("SnackExchange.Web.Models.Country", "OriginCountry")
                         .WithMany()
