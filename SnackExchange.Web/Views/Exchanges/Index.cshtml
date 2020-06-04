@@ -1,83 +1,94 @@
 ﻿@model IEnumerable<SnackExchange.Web.Models.Exchange>
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Home Page";
+
+    SnackExchange.Web.Models.Auth.AppUser user = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        user = userManager.FindByNameAsync(User.Identity.Name).Result;
+    }
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ModeratorNotes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExchangeNotes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhotoUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrackingNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sender)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Receiver)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Moderator)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ModeratorNotes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExchangeNotes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhotoUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TrackingNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sender.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Receiver.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Moderator.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+@if (Model != null && Model.Count() > 0)
+{
+    <h1>Exchange TimeLine</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.ExchangeNotes)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PhotoUrl)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrackingNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Sender)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Receiver)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Status)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CreatedAt)
+                </th>
+                <th class="col-sm-2"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ExchangeNotes)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PhotoUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TrackingNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Sender.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Receiver.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedAt)
+                    </td>
+                    <td class="col-sm-2">
+                        <button type="button" class="btn btn-info btn-sm" onclick="location.href='@Url.Action("Details", "Exchanges", item)'">Details</button>
+                        <button type="button" class="btn btn-warning btn-sm" onclick="location.href='@Url.Action("Edit", "Exchanges", item)'">Edit</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-    </tbody>
-</table>
+else
+{
+    @if (User.Identity.IsAuthenticated)
+    {
+        @Html.Raw("<h1>There are no exchanges!</h1>")
+    }
+    else
+    {
+        @Html.Raw("<h1>Register or Login</h1>")
+    }
+}
+
+
