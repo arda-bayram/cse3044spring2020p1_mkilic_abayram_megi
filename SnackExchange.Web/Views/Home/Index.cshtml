@@ -78,7 +78,31 @@
             }
         </tbody>
     </table>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                    <h4 class="card-header">
+                        @Html.Raw(item.Sender.Email)
+                    </h4>
+                    <div class="card-body">
+                        <p class="card-text">@Html.Raw(item.ExchangeNotes)</p>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-info btn-md" onclick="location.href='@Url.Action("Details", "Exchanges")'">Details</button>
+                        <button type="button" class="btn btn-warning btn-md" onclick="location.href='@Url.Action("Edit", "Exchanges")'">Edit</button>
+                        <button type="button" class="btn btn-danger btn-md" onclick="location.href='@Url.Action("Delete", "Exchanges")'">Delete</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }
+
+
 else
 {
     @if (User.Identity.IsAuthenticated)
