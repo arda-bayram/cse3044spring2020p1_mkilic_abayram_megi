@@ -111,6 +111,15 @@ namespace SnackExchange.Web.Controllers
             exchange.Moderator = _userManager.Users.FirstOrDefault(u => u.IsModerator);
             exchange.TrackingNumber = string.Format("UPS_TEMP_{0}", BASETRACKINGNUMBER + _offerRepository.GetAll().Count());
             exchange.ModeratorNotes = "No moderator notes.";
+            //reject other offers
+            foreach (Offer o in exchange.Offers)
+            {
+                if (o.Id != offer.Id)
+                {
+                    o.Status = OfferStatus.Rejected;
+                    o.UpdatedAt = DateTime.Now;
+                }
+            }
             exchange.UpdatedAt = DateTime.Now;
 
             _exchangeRepository.Update(exchange);
