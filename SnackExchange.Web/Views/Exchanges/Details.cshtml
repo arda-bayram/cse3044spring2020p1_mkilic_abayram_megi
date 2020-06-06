@@ -173,10 +173,10 @@
                         @Html.DisplayNameFor(model => model.Offers.First().Status)
                     </th>
                     <td class="col-sm-2">
-                        @Html.Raw("Show")
+                        @Html.Raw("<b>Show</b>")
                     </td>
 
-                    @if (Model.Status == ExchangeStatus.Accepted)
+                    @if (Model.Status != ExchangeStatus.Accepted)
                     {
                         <th class="col-sm-2">
                             @Html.Raw("Accept")

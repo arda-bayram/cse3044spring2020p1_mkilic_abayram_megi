@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using SnackExchange.Web.Models;
 using SnackExchange.Web.Models.Auth;
 using SnackExchange.Web.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SnackExchange.Web.Controllers
 {
@@ -37,6 +38,7 @@ namespace SnackExchange.Web.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             if(User.Identity.Name != null)

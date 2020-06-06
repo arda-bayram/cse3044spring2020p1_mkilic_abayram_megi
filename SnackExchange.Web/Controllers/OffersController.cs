@@ -101,8 +101,8 @@ namespace SnackExchange.Web.Controllers
             }
             else
             {
-                exchange.Receiver = user;
-                exchange.ReceiverId = user.Id;
+                exchange.Receiver = offer.Offerer;
+                exchange.ReceiverId = offer.Offerer.Id;
             }
 
             offer.Status = OfferStatus.Accepted;
@@ -128,6 +128,48 @@ namespace SnackExchange.Web.Controllers
             return RedirectToAction("Details", "Exchanges", exchange);
         }
 
+        // GET: Offers/Reject/5
+        [Authorize]
+        public IActionResult Reject(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
+            // current user
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+
+            IQueryable<Offer> offerQuery = _offerRepository.FindBy(x => x.Id == id);
+
+            Offer offer = offerQuery.FirstOrDefault();
+            if (offer == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Exchange exchange = _exchangeRepository.FindBy(e => e.Id == offer.ExchangeId).FirstOrDefault();
+            if (exchange == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.Id != exchange.SenderId)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            offer.Status = OfferStatus.Rejected;
+
+            offer.UpdatedAt = DateTime.Now;
+            exchange.UpdatedAt = DateTime.Now;
+
+            _exchangeRepository.Update(exchange);
+            _offerRepository.Update(offer);
+
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
+
+
         // GET: Offers/Create
         [Authorize]
         public IActionResult Create(string Id)
@@ -136,7 +178,11 @@ namespace SnackExchange.Web.Controllers
             {
                 ExchangeId = new Guid(Id)
             };
-            //model.Products.Add(new Product());
+            var exchange = _exchangeRepository.GetById(model.ExchangeId);
+            if (exchange.Status == ExchangeStatus.Accepted)
+            {
+                return RedirectToAction("Details", "Exchanges", exchange);
+            }
             return View(model);
         }
 
@@ -149,6 +195,7 @@ namespace SnackExchange.Web.Controllers
             if (ModelState.IsValid)
             {
                 var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+
                 offer.OffererId = currentUserId;
                 offer.Offerer = _userManager.FindByIdAsync(currentUserId).Result;
                 offer.Status = OfferStatus.Created;
