@@ -238,7 +238,8 @@
                                 @Html.DisplayFor(model => model.Offers[i].Status)
                             </td>
                             <td class="col-sm-2">
-                                <input type="button" value="Show" class="btn btn-info" id="btnShow" />
+                                <input type="button" value="Show" class="btn btn-info" id="btnShow"
+                                       onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                             </td>
                             @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting || Model.Offers[i].Status == OfferStatus.Created))
                             {
@@ -266,15 +267,22 @@
     @if (user.Email != Model.Sender.Email)
     {
         <div>
-            <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer</a>
-            <a asp-controller="Home" asp-action="Index"> | Back to List</a>
+            @if ((Model.Status == ExchangeStatus.Created || Model.Status == ExchangeStatus.None))
+            {
+                <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer |</a>
+            }
+            <a asp-controller="Home" asp-action="Index"> Back to List</a>
         </div>
 
     }
     else
     {
         <hr />
-        <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
+        @if ((Model.Status != ExchangeStatus.Completed || Model.Status != ExchangeStatus.Accepted || Model.Status != ExchangeStatus.OnAir))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
+        }
+
         <a asp-controller="Home" asp-action="Index"> Back to List</a>
     }
 
