@@ -33,6 +33,8 @@ namespace SnackExchange.Web.Models.Auth
 
         public virtual Exchange Exchange { get; set; }
 
+        public virtual AppUser AppUser { get; set; }
+
     }
 
     public enum UserExchangeRole
