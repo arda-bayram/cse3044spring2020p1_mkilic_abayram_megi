@@ -21,23 +21,24 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <button type="button" class="btn btn-success btn-mg " onclick="location.href='@Url.Action("Create", "Exchanges")'">
-                            +
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Offers" asp-action="Index">Offers</a>
-                    </li>
-                    <li class="nav-item " style="right:560px; position: absolute">
-                        <form class="form-inline my-2 my-lg-0">
-                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                        </form>
-                    </li>
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <button type="button" class="btn btn-success btn-mg " onclick="location.href='@Url.Action("Create", "Exchanges")'">
+                                    +
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Offers" asp-action="Index">Offers</a>
+                            </li>
+                            <li class="nav-item " style="right:560px; position: absolute">
+                                <form class="form-inline my-2 my-lg-0">
+                                    <input id="q" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                    <input type="button" value="Search" class="btn btn-outline-success my-2 my-sm-0" id="btnSearch"
+                                           onclick="changeHref()" />
+                                </form>
+                            </li>
 
-                </ul>
+                        </ul>
                     }
                 </div>
             </div>
@@ -58,5 +59,14 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+    <script type="text/javascript">
+
+    function changeHref(){
+        var url = '@Url.Action("Index", "Search")';
+        var txtVal = $('#q').val();
+        window.location.href = url + '/?q=' + txtVal;
+        }
+
+    </script>
 </body>
 </html>
