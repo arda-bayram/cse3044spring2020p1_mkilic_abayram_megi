@@ -13,75 +13,87 @@
     <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="col-md-12">
         <div asp-validation-summary="All" class="text-danger"></div>
 
-        <div style="width:30%; float:left;">
-            <div class="form-group">
+        <div id="Account">
+            <div class="form-group" style="width:30%; float:left;">
                 <label asp-for="Input.Email"></label>
                 <input asp-for="Input.Email" class="form-control" />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.Password"></label>
                 <input asp-for="Input.Password" class="form-control" />
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.ConfirmPassword"></label>
                 <input asp-for="Input.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <div class="form-group">
+        </div>
+        <div class="form-group" style="width:100%; float:left;">
+            <hr />
+        </div>
+        <div id="Identification">
+            <div class="form-group" style="width:30%; float:left;">
                 <label asp-for="Input.FirstName"></label>
                 <input asp-for="Input.FirstName" class="form-control" />
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.LastName"></label>
                 <input asp-for="Input.LastName" class="form-control" />
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
-            <div class="form-group">
+        </div>
+        <div class="form-group" style="width:100%; float:left;">
+            <hr />
+        </div>
+        <div id="Country">
+            <div class="form-group" style="width:30%; float:left;">
                 <label asp-for="Input.Country"></label>
                 <input asp-for="Input.Country" class="form-control" />
                 <span asp-validation-for="Input.Country" class="text-danger"></span>
             </div>
-        </div>
-
-        <div style="width:30%; float:left; margin-left:5%;">
-
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.CountryCode"></label>
                 <input asp-for="Input.CountryCode" class="form-control" />
                 <span asp-validation-for="Input.CountryCode" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.Currency"></label>
                 <input asp-for="Input.Currency" class="form-control" />
                 <span asp-validation-for="Input.Currency" class="text-danger"></span>
             </div>
-            <div class="form-group">
+        </div>
+        <div class="form-group" style="width:100%; float:left;">
+            <hr />
+        </div>
+        <div id="Address">
+            <div class="form-group" style="width:30%; float:left;">
                 <label asp-for="Input.AddressTitle" class="control-label"></label>
                 <input asp-for="Input.AddressTitle" class="form-control" />
                 <span asp-validation-for="Input.AddressTitle" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.AddressText" class="control-label"></label>
                 <input asp-for="Input.AddressText" class="form-control" />
                 <span asp-validation-for="Input.AddressText" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width:30%; float:left; margin-left:5%;">
                 <label asp-for="Input.AddressPlusCode" class="control-label"></label>
                 <input asp-for="Input.AddressPlusCode" class="form-control" />
                 <span asp-validation-for="Input.AddressPlusCode" class="text-danger"></span>
             </div>
-            <div>
-                <button type="submit" class="btn btn-primary">Register</button>
-            </div>
+        </div>
+        <div class="form-group" style="width:100%; float:left;">
+            <hr />
+        </div>
+        <div class="form-group" style="width:100%; float:left;">
+            <button type="submit" class="btn btn-primary">Register</button>
         </div>
 
 
-
     </form>
-
 
 </div>
 
