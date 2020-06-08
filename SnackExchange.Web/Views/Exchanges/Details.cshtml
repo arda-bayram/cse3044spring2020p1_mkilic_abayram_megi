@@ -172,11 +172,14 @@
                     <th class="col-sm-2">
                         @Html.DisplayNameFor(model => model.Offers.First().Status)
                     </th>
-                    <td class="col-sm-2">
-                        @Html.Raw("<b>Show</b>")
-                    </td>
+                    <th class="col-sm-2">
+                        @Html.Raw("Total Price")
+                    </th>
+                    <th class="col-sm-2">
+                        @Html.Raw("Show")
+                    </th>
 
-                    @if (Model.Status != ExchangeStatus.Accepted)
+                    @if (Model.Status != ExchangeStatus.Accepted && Model.Sender.Email == user.Email)
                     {
                         <th class="col-sm-2">
                             @Html.Raw("Accept")
@@ -190,6 +193,29 @@
             <tbody>
                 @for (var i = 0; i < Model.Offers.Count; i++)
                 {
+                    double totalPrice = 0;
+                    @foreach (var product in Model.Offers[i].Products)
+                    {
+                        var priceUnformatted = product.Price;
+                        double price;
+                        if (priceUnformatted.All(char.IsDigit))
+                        {
+                            price = Double.Parse(product.Price);
+                        }
+                        else
+                        {
+                            var dotIndex = -1;
+                            dotIndex = priceUnformatted.IndexOf(".");
+                            var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
+                            if (dotIndex != -1)
+                            {
+                                p.Insert(dotIndex, ".");
+                            }
+                            price = Double.Parse(p);
+                        }
+                        totalPrice += price;
+                    }
+
                     @if (Model.Status == ExchangeStatus.Accepted)
                     {
                         @if (Model.Offers[i].Status == OfferStatus.Accepted)
@@ -203,6 +229,9 @@
                                 </td>
                                 <td class="col-sm-2" style="color:green">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2" style="color:green">
+                                    @Html.Raw(totalPrice) $
                                 </td>
                                 <td class="col-sm-2">
                                     <input type="button" value="Show" class="btn btn-info" id="btnShow"
@@ -222,40 +251,69 @@
                                 <td class="col-sm-2">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
                                 </td>
+                                <td>
+                                    @Html.Raw(totalPrice) $
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr>
-                            <td class="col-sm-2">
-                                @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
-                            </td>
-                            <td class="col-sm-2">
-                                @Html.DisplayFor(model => model.Offers[i].OfferNotes)
-                            </td>
-                            <td class="col-sm-2">
-                                @Html.DisplayFor(model => model.Offers[i].Status)
-                            </td>
-                            <td class="col-sm-2">
-                                <input type="button" value="Show" class="btn btn-info" id="btnShow"
-                                       onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
-                            </td>
-                            @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting || Model.Offers[i].Status == OfferStatus.Created))
-                            {
-                                <td class="col-sm-2">
-                                    <input type="button" value="Accept" class="btn btn-success" id="btnAccept"
-                                           onclick="location.href='@Url.Action("Accept", "Offers", new { id = Model.Offers[i].Id })'" />
+                        @if (Model.Offers[i].Status == OfferStatus.Rejected)
+                        {
+                            <tr>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.Raw(totalPrice) $
                                 </td>
                                 <td class="col-sm-2">
-                                    <input type="button" value="Reject" class="btn btn-danger" id="btnReject"
-                                           onclick="location.href='@Url.Action("Reject", "Offers", new { id = Model.Offers[i].Id })'" />
+                                    <input type="button" value="Show" class="btn btn-info" id="btnShow"
+                                           onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
-                            }
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2">
+                                    @Html.Raw(totalPrice) $
+                                </td>
+                                <td class="col-sm-2">
+                                    <input type="button" value="Show" class="btn btn-info" id="btnShow"
+                                           onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
+                                </td>
+                                @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting || Model.Offers[i].Status == OfferStatus.Created))
+                                {
+                                    <td class="col-sm-2">
+                                        <input type="button" value="Accept" class="btn btn-success" id="btnAccept"
+                                               onclick="location.href='@Url.Action("Accept", "Offers", new { id = Model.Offers[i].Id })'" />
+                                    </td>
+                                    <td class="col-sm-2">
+                                        <input type="button" value="Reject" class="btn btn-danger" id="btnReject"
+                                               onclick="location.href='@Url.Action("Reject", "Offers", new { id = Model.Offers[i].Id })'" />
+                                    </td>
+                                }
 
-                        </tr>
+                            </tr>
+                        }
                     }
-
                 }
             </tbody>
         </table>

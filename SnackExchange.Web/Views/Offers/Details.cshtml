@@ -122,9 +122,12 @@
     }
 </div>
 <div>
-    <input type="button" value="Edit" class="btn btn-info" id="btnShow"
-           onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
-    |
+    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected)
+    {
+        <input type="button" value="Edit" class="btn btn-info" id="btnShow"
+               onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
+    }
+
     <input type="button" value="Back To Exchange" class="btn btn-info" id="btnShow"
            onclick="location.href='@Url.Action("Details", "Exchanges", new { id = Model.Exchange.Id })'" />
 </div>
