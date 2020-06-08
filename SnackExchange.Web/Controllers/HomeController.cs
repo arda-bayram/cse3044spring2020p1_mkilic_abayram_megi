@@ -41,17 +41,8 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            if(User.Identity.Name != null)
-            {
-                var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
-                var exchanges = _exchangeRepository.GetAll();
-                return View(exchanges);
-            }
-            else
-            {
-                return View();
-            }
-
+            var exchanges = _exchangeRepository.GetAll();
+            return RedirectToAction("Index","Exchanges", exchanges);
         }
 
         public IActionResult Privacy()
