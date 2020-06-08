@@ -36,7 +36,7 @@
                     @Html.DisplayFor(modelItem => item.Offer.Id)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <a asp-controller="Products" asp-action="Details" asp-route-id="@item.Id">Details</a>
                 </td>
             </tr>
         }

@@ -1,8 +1,10 @@
 ﻿@model SnackExchange.Web.Models.Offer
 @using System.Text.RegularExpressions;
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
     ViewData["Title"] = "Details";
+    var user = userManager.FindByNameAsync(User.Identity.Name).Result;
 }
 
 <h1>Details</h1>
@@ -122,7 +124,7 @@
     }
 </div>
 <div>
-    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected)
+    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected && Model.Offerer.Email == user.Email)
     {
         <input type="button" value="Edit" class="btn btn-info" id="btnShow"
                onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
