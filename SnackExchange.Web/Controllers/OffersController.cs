@@ -208,12 +208,18 @@ namespace SnackExchange.Web.Controllers
                 }
 
                 _offerRepository.Insert(offer);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(AfterCreate), new { Id = offer.ExchangeId});
             }
             //ViewData["OffererId"] = new SelectList(_context.AppUsers, "Id", "Id", offer.OffererId);
             return View(offer);
         }
 
+        [Authorize]
+        public IActionResult AfterCreate(string Id)
+        {
+            var exchange = _exchangeRepository.GetById(new Guid(Id));
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
