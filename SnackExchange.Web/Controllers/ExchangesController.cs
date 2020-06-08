@@ -42,17 +42,24 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
+
             var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
-            if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
+            if (user != null)
             {
-                return View(_exchangeRepository.GetAll());
+                if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
+                {
+                    return View(_exchangeRepository.GetAll());
+                }
+                else
+                {
+                    var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
+                    return View(myExchanges);
+                }
             }
             else
             {
-                var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
-                return View(myExchanges);
+                return RedirectToAction("Privacy", "Home");
             }
-
         }
 
         // GET: Exchanges/Details/5
