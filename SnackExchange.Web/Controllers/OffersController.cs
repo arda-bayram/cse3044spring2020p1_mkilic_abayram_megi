@@ -198,7 +198,7 @@ namespace SnackExchange.Web.Controllers
 
                 offer.OffererId = currentUserId;
                 offer.Offerer = _userManager.FindByIdAsync(currentUserId).Result;
-                offer.Status = OfferStatus.Created;
+                offer.Status = OfferStatus.Waiting;
                 offer.Products = offer.Products.Where(p => !string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price)).ToList();
 
                 foreach (Product p in offer.Products)

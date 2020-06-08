@@ -32,8 +32,6 @@ namespace SnackExchange.Web.Models
         None = 0,
         Waiting = 1,
         Accepted = 2,
-        Completed = 3,
-        Created = 4,
-        Rejected = 5
+        Rejected = 3
     }
 }

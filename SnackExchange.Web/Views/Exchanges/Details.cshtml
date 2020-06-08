@@ -299,7 +299,7 @@
                                     <input type="button" value="Show" class="btn btn-info" id="btnShow"
                                            onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
-                                @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting || Model.Offers[i].Status == OfferStatus.Created))
+                                @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting))
                                 {
                                     <td class="col-sm-2">
                                         <input type="button" value="Accept" class="btn btn-success" id="btnAccept"

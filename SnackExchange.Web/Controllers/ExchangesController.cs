@@ -263,7 +263,7 @@ namespace SnackExchange.Web.Controllers
         {
             exchange.Sender = user;
             exchange.SenderId = user.Id;
-            exchange.Status = ExchangeStatus.Waiting;
+            exchange.Status = ExchangeStatus.Created;
             return View(exchange);
         }
         public IActionResult AddModerator(Exchange exchange, AppUser user)

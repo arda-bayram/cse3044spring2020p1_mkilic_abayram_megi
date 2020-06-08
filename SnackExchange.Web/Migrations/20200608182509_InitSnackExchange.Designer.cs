@@ -10,7 +10,7 @@ using SnackExchange.Web.Data;
 namespace SnackExchange.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200530212342_InitSnackExchange")]
+    [Migration("20200608182509_InitSnackExchange")]
     partial class InitSnackExchange
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -562,7 +562,7 @@ namespace SnackExchange.Web.Migrations
 
             modelBuilder.Entity("SnackExchange.Web.Models.Auth.ExchangeUserModel", b =>
                 {
-                    b.HasOne("SnackExchange.Web.Models.Auth.AppUser", null)
+                    b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "AppUser")
                         .WithMany("Exchanges")
                         .HasForeignKey("AppUserId");
 

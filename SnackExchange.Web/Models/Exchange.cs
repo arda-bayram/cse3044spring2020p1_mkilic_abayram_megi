@@ -33,10 +33,9 @@ namespace SnackExchange.Web.Models
     public enum ExchangeStatus
     {
         None = 0,
-        Waiting = 1,
+        Created = 1,
         Accepted = 2,
-        Completed = 3,
-        Created = 4,
-        OnAir = 5
+        OnAir = 3,
+        Completed = 4
     }
 }
