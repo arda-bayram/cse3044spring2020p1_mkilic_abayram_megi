@@ -322,7 +322,7 @@
 
 </div>
 <div>
-    @if (user.Email != Model.Sender.Email)
+    @if (user.Email != Model.Sender.Email && !user.IsModerator)
     {
         <div>
             @if ((Model.Status == ExchangeStatus.Created || Model.Status == ExchangeStatus.None))
