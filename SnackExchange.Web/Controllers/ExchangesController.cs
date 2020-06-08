@@ -62,6 +62,14 @@ namespace SnackExchange.Web.Controllers
             }
         }
 
+        [Authorize]
+        public IActionResult MyExchanges()
+        {
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
+            return View("Index", myExchanges);
+        }
+
         // GET: Exchanges/Details/5
         [Authorize]
         public IActionResult Details(Guid id)
