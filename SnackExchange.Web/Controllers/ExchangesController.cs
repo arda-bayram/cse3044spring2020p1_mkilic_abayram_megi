@@ -48,7 +48,7 @@ namespace SnackExchange.Web.Controllers
             {
                 if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
                 {
-                    return View(_exchangeRepository.GetAll());
+                    return View(_exchangeRepository.FindBy( e => e.Status != ExchangeStatus.Completed));
                 }
                 else
                 {
