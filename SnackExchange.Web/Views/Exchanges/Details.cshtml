@@ -338,9 +338,11 @@
         <div>
             @if ((Model.Status == ExchangeStatus.Created || Model.Status == ExchangeStatus.None))
             {
-                <a asp-controller="Offers" asp-action="Create" asp-route-id="@Model.Id">Offer |</a>
+                <input type="button" value="Offer" class="btn btn-info" id="btnOffer"
+                       onclick="location.href='@Url.Action("Create", "Offers", Model)'" />
             }
-            <a asp-controller="Home" asp-action="Index"> Back to List</a>
+                <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
+                       onclick="location.href='@Url.Action("Index", "Home", Model)'" />
         </div>
 
     }
@@ -351,9 +353,10 @@
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
             }*@
-
-        <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
-               onclick="location.href='@Url.Action("Index", "Home", Model)'" />
+        <div class="col-md-4">
+            <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
+                   onclick="location.href='@Url.Action("Index", "Home", Model)'" />
+        </div>
         @*<a asp-controller="Home" asp-action="Index"> Back to List</a>*@
     }
 
