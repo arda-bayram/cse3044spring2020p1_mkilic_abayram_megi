@@ -300,5 +300,20 @@ namespace SnackExchange.Web.Controllers
         }
 
 
+        // GET
+        [Authorize]
+        public IActionResult Complete(string Id)
+        {
+            var exchange = _exchangeRepository.GetById(new Guid(Id));
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+
+            if (user == exchange.Sender && exchange.Sender != null && exchange.Receiver != null && (exchange.Offers.Count(o => o.Status == OfferStatus.Accepted) >= 1))
+            {
+                exchange.Status = ExchangeStatus.Completed;
+                _exchangeRepository.Update(exchange);
+            }
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
+
     }
 }

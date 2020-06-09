@@ -87,8 +87,8 @@
 
     @if ((Model.Status == ExchangeStatus.Accepted || Model.Status == ExchangeStatus.OnAir) && user.Email == Model.Sender.Email)
     {
-        <input type="button" value="Completed" class="btn btn-success" id="btnCompleted"
-               onclick="location.href='@Url.Action("Edit", "Exchanges", Model)'" />
+        <input type="button" value="Complete" class="btn btn-success" id="btnComplete"
+               onclick="location.href='@Url.Action("Complete", "Exchanges", Model)'" />
     }
 
     <br />
