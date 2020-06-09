@@ -109,6 +109,12 @@
                onclick="location.href='@Url.Action("Complete", "Exchanges", Model)'" />
     }
 
+    @if (Model.Status == ExchangeStatus.Created && user.Email == Model.Sender.Email)
+    {
+        <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
+               onclick="location.href='@Url.Action("Delete", "Exchanges", Model)'" />
+    }
+
     <br />
     <h class="col-sm-2">
         @Html.Raw("<h1><b>Products</b></h1>")
@@ -374,16 +380,10 @@
     }
     else
     {
-        @*<hr />*@
-        @*@if ((Model.Status != ExchangeStatus.Completed || Model.Status != ExchangeStatus.Accepted || Model.Status != ExchangeStatus.OnAir))
-            {
-                <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
-            }*@
         <div class="col-md-4">
             <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
                    onclick="location.href='@Url.Action("Index", "Home", Model)'" />
         </div>
-        @*<a asp-controller="Home" asp-action="Index"> Back to List</a>*@
     }
 
 
