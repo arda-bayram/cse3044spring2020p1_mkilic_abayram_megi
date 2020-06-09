@@ -79,6 +79,18 @@
         </dd>
     </dl>
 
+    @if ((Model.Status != ExchangeStatus.Completed && Model.Status != ExchangeStatus.Accepted && Model.Status != ExchangeStatus.OnAir) && (user.Email == Model.Sender.Email || user.IsModerator))
+    {
+        <input type="button" value="Edit" class="btn btn-warning" id="btnEdit"
+               onclick="location.href='@Url.Action("Edit", "Exchanges", Model)'" />
+    }
+
+    @if ((Model.Status == ExchangeStatus.Accepted || Model.Status == ExchangeStatus.OnAir) && user.Email == Model.Sender.Email)
+    {
+        <input type="button" value="Completed" class="btn btn-success" id="btnCompleted"
+               onclick="location.href='@Url.Action("Edit", "Exchanges", Model)'" />
+    }
+
     <br />
     <h class="col-sm-2">
         @Html.Raw("<h1><b>Products</b></h1>")
@@ -154,7 +166,7 @@
     <h class="col-sm-2">
         @Html.Raw("<h1><b>Offers</b></h1>")
     </h>
-    @if (Model.Offers.Count < 0)
+    @if (Model.Offers.Count <= 0)
     {
         @Html.Raw("<h4>No offers proposed yet!<h4>")
     }
@@ -318,9 +330,8 @@
             </tbody>
         </table>
     }
-
-
 </div>
+
 <div>
     @if (user.Email != Model.Sender.Email && !user.IsModerator)
     {
@@ -335,13 +346,15 @@
     }
     else
     {
-        <hr />
-        @if ((Model.Status != ExchangeStatus.Completed || Model.Status != ExchangeStatus.Accepted || Model.Status != ExchangeStatus.OnAir))
-        {
-            <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
-        }
+        @*<hr />*@
+        @*@if ((Model.Status != ExchangeStatus.Completed || Model.Status != ExchangeStatus.Accepted || Model.Status != ExchangeStatus.OnAir))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id">Edit |</a>
+            }*@
 
-        <a asp-controller="Home" asp-action="Index"> Back to List</a>
+        <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
+               onclick="location.href='@Url.Action("Index", "Home", Model)'" />
+        @*<a asp-controller="Home" asp-action="Index"> Back to List</a>*@
     }
 
 

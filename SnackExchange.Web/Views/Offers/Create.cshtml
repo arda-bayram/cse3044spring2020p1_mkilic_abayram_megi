@@ -14,17 +14,17 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="OfferNotes" class="control-label"></label>
-                <input asp-for="OfferNotes" class="form-control" />
+                <input asp-for="OfferNotes" class="form-control"  required/>
                 <span asp-validation-for="OfferNotes" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PhotoUrl" class="control-label"></label>
-                <input asp-for="PhotoUrl" class="form-control" />
+                <input asp-for="PhotoUrl" class="form-control"  required/>
                 <span asp-validation-for="PhotoUrl" class="text-danger"></span>
             </div>
             <div class="form-group" hidden>
                 <label asp-for="ExchangeId" class="control-label"></label>
-                <input asp-for="ExchangeId" class="form-control" />
+                <input asp-for="ExchangeId" class="form-control"  required/>
                 <span asp-validation-for="ExchangeId" class="text-danger"></span>
             </div>
             <div id="orderItemsContainer">
