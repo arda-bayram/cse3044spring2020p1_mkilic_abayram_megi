@@ -187,6 +187,7 @@ namespace SnackExchange.Web.Controllers
                     exchange.Sender = user;
                     exchange.SenderId = user.Id;
                     exchange.UpdatedAt = DateTime.Now;
+                    exchange.Status = ExchangeStatus.Created;
                     _exchangeRepository.Update(exchange);
                 }
                 catch (DbUpdateConcurrencyException)

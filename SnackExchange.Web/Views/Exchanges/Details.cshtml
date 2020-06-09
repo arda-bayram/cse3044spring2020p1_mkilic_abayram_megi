@@ -339,7 +339,7 @@
                                 @if (Model.Status == ExchangeStatus.Created && (Model.Offers[i].Offerer.Id == user.Id || Model.Offers[i].Exchange.Sender.Id == user.Id))
                                 {
                                     <td class="col-sm-2">
-                                        <input type="button" value="Delete" class="btn btn-info" id="btnDelete"
+                                        <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
                                                onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
                                     </td>
                                 }
