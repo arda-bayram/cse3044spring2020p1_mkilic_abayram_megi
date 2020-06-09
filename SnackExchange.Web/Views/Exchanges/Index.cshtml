@@ -20,8 +20,6 @@
     <div class="row">
         @foreach (var item in Model)
         {
-            @*@if (item.Status == ExchangeStatus.Created)
-                {*@
             <div class="col-lg-4 mb-4">
                 <div class="card h-100">
                     @if (!string.IsNullOrEmpty(item.PhotoUrl))
@@ -55,7 +53,6 @@
                     </div>
                 </div>
             </div>
-            @*}*@
         }
     </div>
 }
