@@ -172,7 +172,7 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
         {
             if (id != exchange.Id)
             {

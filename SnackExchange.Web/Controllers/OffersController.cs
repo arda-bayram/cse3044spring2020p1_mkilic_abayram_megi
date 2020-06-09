@@ -208,7 +208,7 @@ namespace SnackExchange.Web.Controllers
                 }
 
                 _offerRepository.Insert(offer);
-                return RedirectToAction(nameof(AfterCreate), new { Id = offer.ExchangeId});
+                return RedirectToAction(nameof(AfterCreate), new { Id = offer.ExchangeId });
             }
             //ViewData["OffererId"] = new SelectList(_context.AppUsers, "Id", "Id", offer.OffererId);
             return View(offer);
@@ -335,10 +335,31 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var offer = await _context.Offer.FindAsync(id);
-            _context.Offer.Remove(offer);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var offer = _offerRepository.GetById(id);
+            var exchange = _exchangeRepository.GetById(offer.Exchange.Id);
+
+            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user == null)
+            {
+                return RedirectToAction("Details", "Exchanges", exchange);
+            }
+
+            if (offer.Offerer.Id == user.Id || user.IsModerator)
+            {
+
+                for (int i = 0; i < offer.Products.Count; i++)
+                {
+                    if (offer.Products.Count > 0)
+                    {
+                        offer.Products[i].Exchange = null;
+                        _productRepository.Update(offer.Products[i]);
+                    }
+                }
+
+                _offerRepository.Delete(offer.Id);
+            }
+
+            return RedirectToAction("Details", "Exchanges", exchange);
         }
 
         private bool OfferExists(Guid id)
