@@ -200,6 +200,7 @@
                             @Html.Raw("Reject")
                         </th>
                     }
+
                 </tr>
             </thead>
             <tbody>
@@ -249,6 +250,13 @@
                                     <input type="button" value="Show" class="btn btn-info" id="btnShow"
                                            onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
+                                @if (Model.Status == ExchangeStatus.Created && (Model.Offers[i].Offerer.Id == user.Id || Model.Offers[i].Exchange.Sender.Id == user.Id))
+                                {
+                                    <td class="col-sm-2">
+                                        <input type="button" value="Delete" class="btn btn-info" id="btnDelete"
+                                               onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
+                                    </td>
+                                }
                             </tr>
                         }
                         else
@@ -341,8 +349,8 @@
                 <input type="button" value="Offer" class="btn btn-info" id="btnOffer"
                        onclick="location.href='@Url.Action("Create", "Offers", Model)'" />
             }
-                <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
-                       onclick="location.href='@Url.Action("Index", "Home", Model)'" />
+            <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
+                   onclick="location.href='@Url.Action("Index", "Home", Model)'" />
         </div>
 
     }
