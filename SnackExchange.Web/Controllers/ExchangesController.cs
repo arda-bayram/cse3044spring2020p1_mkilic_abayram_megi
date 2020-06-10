@@ -48,7 +48,7 @@ namespace SnackExchange.Web.Controllers
             {
                 if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
                 {
-                    return View(_exchangeRepository.FindBy( e => e.Status != ExchangeStatus.Completed));
+                    return View(_exchangeRepository.FindBy(e => e.Status != ExchangeStatus.Completed));
                 }
                 else
                 {
@@ -185,8 +185,14 @@ namespace SnackExchange.Web.Controllers
                 {
                     var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
                     var exchangeDb = _exchangeRepository.GetById(exchange.Id);
+                    if (user == exchangeDb.Sender || user.IsModerator)
+                    {
+                        exchangeDb.ExchangeNotes = exchange.ExchangeNotes;
+                        exchangeDb.PhotoUrl = exchange.PhotoUrl;
+                        exchangeDb.TrackingNumber = exchange.TrackingNumber;
+                    }
                     exchangeDb.ModeratorNotes = exchange.ModeratorNotes;
-                    if(exchangeDb.Moderator == null && user.IsModerator)
+                    if (exchangeDb.Moderator == null && user.IsModerator)
                     {
                         exchangeDb.Moderator = user;
                     }
