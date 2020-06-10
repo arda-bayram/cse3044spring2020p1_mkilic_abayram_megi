@@ -1,0 +1,96 @@
+//// -- LEVEL 1
+//// -- Tables and References
+
+// Creating tables
+Table users as U {
+  id int [pk, increment] // auto-increment
+  username varchar
+  full_name varchar
+  email varchar
+  country_id int [ref: - C.id]
+  request_id int [ref: > R.id]
+  created_at timestamp
+}
+
+Table user_address as UA {
+  id int [pk, increment]
+  user_id int [ref: - U.id]
+  address_id int [ref: - A.id]
+}
+
+Table address as A{
+  id int [pk, increment]
+  address_title varchar
+  plus_code varchar
+}
+
+Table exchanges as E {
+  id int [pk, increment] // primary key
+  user_id_sender int [not null, unique, ref: - U.id]
+  user_id_receiver int [not null, unique, ref: - U.id]
+  exchange_items int [ref: - EI.id]
+  status exchange_status
+}
+
+Table exchange_item as EI{
+  id int [pk, increment]
+  exchange_id int [ref: > E.id]
+  product_id int [ref: < P.id]
+  price decimal
+  quantity int [default: 1] // default value
+  country_name varchar [ref: - C.name]
+}
+
+Table country as C {
+  id int [pk, increment]
+  name varchar [unique, not null]
+  currency varchar [unique, not null]
+  country_code int [unique, not null]
+}
+Table products as P {
+  id int [pk, increment]
+  name varchar
+  price int
+  origin varchar [ref: - C.name]
+}
+
+Table request as R {
+  id int [pk, increment]
+
+  created_at datetime
+  notes text
+}
+
+Table user_request as UR {
+  id int [pk, increment]
+  user_id int [ref: - U.id]
+  request_id int [ref: - R.id]
+}
+
+Enum exchange_status {
+  request
+  pending
+  accepted
+  completed
+}
+
+
+
+
+
+// Indexes: You can define a single or multi-column index 
+// Creating references
+// You can also define relationship separately
+// > many-to-one; < one-to-many; - one-to-one
+
+//----------------------------------------------//
+
+//// -- LEVEL 2
+//// -- Adding column settings
+
+//----------------------------------------------//
+
+//// -- Level 3 
+//// -- Enum, Indexes
+
+// Enum for 'products' table below
