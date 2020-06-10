@@ -77,10 +77,13 @@
             </div>
         </div>
     </div>
-    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected && Model.Offerer.Email == user.Email)
+    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected && (Model.Offerer.Email == user.Email || user.IsModerator))
     {
-        <input type="button" value="Edit" class="btn btn-warning" id="btnShow"
-               onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
+        @if (Model.Offerer.Email == user.Email)
+        {
+            <input type="button" value="Edit" class="btn btn-warning" id="btnShow"
+                   onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
+        }
         <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
                onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Id })'" />
     }

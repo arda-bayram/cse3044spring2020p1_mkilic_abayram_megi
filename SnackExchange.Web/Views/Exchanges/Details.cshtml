@@ -112,7 +112,7 @@
                onclick="location.href='@Url.Action("Complete", "Exchanges", Model)'" />
     }
 
-    @if (Model.Status == ExchangeStatus.Created && user.Email == Model.Sender.Email)
+    @if (Model.Status == ExchangeStatus.Created && (user.Email == Model.Sender.Email || user.IsModerator))
     {
         <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
                onclick="location.href='@Url.Action("Delete", "Exchanges", Model)'" />
