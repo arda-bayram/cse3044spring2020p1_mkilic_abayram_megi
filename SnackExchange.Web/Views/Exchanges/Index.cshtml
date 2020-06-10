@@ -45,10 +45,7 @@
                         @if ((user.IsModerator || user.Email == item.Sender.Email) && !(item.Status == ExchangeStatus.Accepted || item.Status == ExchangeStatus.Completed))
                         {
                             <button type="button" class="btn btn-warning btn-md" onclick="location.href='@Url.Action("Edit", "Exchanges", item)'">Edit</button>
-                            @if (user.Email == item.Sender.Email)
-                            {
-                                <button type="button" class="btn btn-danger btn-md" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
-                            }
+                            <button type="button" class="btn btn-danger btn-md" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
                         }
                     </div>
                 </div>

@@ -60,12 +60,15 @@
                             @Html.Raw("<p> - </p>")
                         </dd>
                     }
-                    <dt class="col-sm-2">
-                        @Html.DisplayNameFor(model => model.Moderator)
-                    </dt>
-                    <dd class="col-sm-10">
-                        @Html.DisplayFor(model => model.Moderator.Id)
-                    </dd>
+                    @if (Model.Moderator != null && user.IsModerator)
+                    {
+                        <dt class="col-sm-2">
+                            @Html.DisplayNameFor(model => model.Moderator)
+                        </dt>
+                        <dd class="col-sm-10">
+                            @Html.DisplayFor(model => model.Moderator.Email)
+                        </dd>
+                    }
                     <dt class="col-sm-2">
                         @Html.DisplayNameFor(model => model.Status)
                     </dt>
@@ -337,12 +340,12 @@
                                            onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
                                 @*@if (Model.Status == ExchangeStatus.Created && (Model.Offers[i].Offerer.Id == user.Id || Model.Offers[i].Exchange.Sender.Id == user.Id))
-                                {
-                                    <td class="col-sm-2">
-                                        <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
-                                               onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
-                                    </td>
-                                }*@
+                                    {
+                                        <td class="col-sm-2">
+                                            <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
+                                                   onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
+                                        </td>
+                                    }*@
                                 @if (user.IsModerator == false && Model.Sender.Email == user.Email && (Model.Offers[i].Status == OfferStatus.Waiting))
                                 {
                                     <td class="col-sm-2">

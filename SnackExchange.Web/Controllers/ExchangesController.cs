@@ -184,11 +184,14 @@ namespace SnackExchange.Web.Controllers
                 try
                 {
                     var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
-                    exchange.Sender = user;
-                    exchange.SenderId = user.Id;
-                    exchange.UpdatedAt = DateTime.Now;
-                    exchange.Status = ExchangeStatus.Created;
-                    _exchangeRepository.Update(exchange);
+                    var exchangeDb = _exchangeRepository.GetById(exchange.Id);
+                    exchangeDb.ModeratorNotes = exchange.ModeratorNotes;
+                    if(exchangeDb.Moderator == null && user.IsModerator)
+                    {
+                        exchangeDb.Moderator = user;
+                    }
+                    exchangeDb.UpdatedAt = DateTime.Now;
+                    _exchangeRepository.Update(exchangeDb);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

@@ -21,39 +21,36 @@
     <div class="row">
         @foreach (var item in Model)
         {
-            @if (item.Status == ExchangeStatus.Created)
-            {
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100">
-                        @if (!string.IsNullOrEmpty(item.PhotoUrl))
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(item.PhotoUrl))
+                    {
+                        <a href="#">
+                            <img src="@Url.Content(item.PhotoUrl)" alt="" class="card-img-top" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="#">
+                            <img class="card-img-top" src="http://placehold.it/700x400" alt="">
+                        </a>
+                    }
+                    <h4 class="card-header">
+                        @Html.Raw(item.Sender.Email)
+                    </h4>
+                    <div class="card-body">
+                        <p class="card-text">@Html.Raw(item.ExchangeNotes)</p>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-info btn-md" onclick="location.href='@Url.Action("Details", "Exchanges", item)'">Details</button>
+                        @if ((user.IsModerator || user.Email == item.Sender.Email) && !(item.Status == ExchangeStatus.Accepted || item.Status == ExchangeStatus.Completed))
                         {
-                            <a href="#">
-                                <img src="@Url.Content(item.PhotoUrl)" alt="" class="card-img-top" />
-                            </a>
+                            <button type="button" class="btn btn-warning btn-md" onclick="location.href='@Url.Action("Edit", "Exchanges", item)'">Edit</button>
+                            <button type="button" class="btn btn-danger btn-md" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
                         }
-                        else
-                        {
-                            <a href="#">
-                                <img class="card-img-top" src="http://placehold.it/700x400" alt="">
-                            </a>
-                        }
-                        <h4 class="card-header">
-                            @Html.Raw(item.Sender.Email)
-                        </h4>
-                        <div class="card-body">
-                            <p class="card-text">@Html.Raw(item.ExchangeNotes)</p>
-                        </div>
-                        <div class="card-footer">
-                            <button type="button" class="btn btn-info btn-md" onclick="location.href='@Url.Action("Details", "Exchanges", item)'">Details</button>
-                            @if (user.Email == item.Sender.Email)
-                            {
-                                <button type="button" class="btn btn-warning btn-md" onclick="location.href='@Url.Action("Edit", "Exchanges", item)'">Edit</button>
-                                <button type="button" class="btn btn-danger btn-md" onclick="location.href='@Url.Action("Delete", "Exchanges", item)'">Delete</button>
-                            }
-                        </div>
                     </div>
                 </div>
-            }
+            </div>
         }
     </div>
 }
