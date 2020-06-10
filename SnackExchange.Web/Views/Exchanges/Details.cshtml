@@ -370,7 +370,7 @@
         <div>
             @if ((Model.Status == ExchangeStatus.Created || Model.Status == ExchangeStatus.None))
             {
-                <input type="button" value="Offer" class="btn btn-info" id="btnOffer"
+                <input type="button" value="Offer" class="btn btn-primary" id="btnOffer"
                        onclick="location.href='@Url.Action("Create", "Offers", Model)'" />
             }
             <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
