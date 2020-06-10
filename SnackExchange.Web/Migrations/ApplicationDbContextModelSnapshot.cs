@@ -560,7 +560,7 @@ namespace SnackExchange.Web.Migrations
 
             modelBuilder.Entity("SnackExchange.Web.Models.Auth.ExchangeUserModel", b =>
                 {
-                    b.HasOne("SnackExchange.Web.Models.Auth.AppUser", null)
+                    b.HasOne("SnackExchange.Web.Models.Auth.AppUser", "AppUser")
                         .WithMany("Exchanges")
                         .HasForeignKey("AppUserId");
 

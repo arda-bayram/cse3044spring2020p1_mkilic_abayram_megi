@@ -1,8 +1,10 @@
 ﻿@model SnackExchange.Web.Models.Offer
 @using System.Text.RegularExpressions;
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
     ViewData["Title"] = "Details";
+    var user = userManager.FindByNameAsync(User.Identity.Name).Result;
 }
 
 <h1>Details</h1>
@@ -88,7 +90,7 @@
                                 @Html.DisplayFor(model => model.Products[i].Description)
                             </td>
                             <td class="col-sm-2">
-                                @Html.DisplayFor(model => model.Products[i].Price) $ 
+                                @Html.DisplayFor(model => model.Products[i].Price) $
                             </td>
                         </tr>
                         var priceUnformatted = Model.Products[i].Price;
@@ -122,6 +124,12 @@
     }
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (Model.Status != OfferStatus.Accepted && Model.Status != OfferStatus.Rejected && Model.Offerer.Email == user.Email)
+    {
+        <input type="button" value="Edit" class="btn btn-info" id="btnShow"
+               onclick="location.href='@Url.Action("Edit", "Offers", new { id = Model.Id })'" />
+    }
+
+    <input type="button" value="Back To Exchange" class="btn btn-info" id="btnShow"
+           onclick="location.href='@Url.Action("Details", "Exchanges", new { id = Model.Exchange.Id })'" />
 </div>

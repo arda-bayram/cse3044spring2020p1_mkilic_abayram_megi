@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,17 +42,32 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
+
             var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
-            if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
+            if (user != null)
             {
-                return View(_exchangeRepository.GetAll());
+                if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
+                {
+                    return View(_exchangeRepository.FindBy( e => e.Status != ExchangeStatus.Completed));
+                }
+                else
+                {
+                    var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
+                    return View(myExchanges);
+                }
             }
             else
             {
-                var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
-                return View(myExchanges);
+                return RedirectToAction("Privacy", "Home");
             }
+        }
 
+        [Authorize]
+        public IActionResult MyExchanges()
+        {
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            var myExchanges = _exchangeRepository.FindBy(e => e.Sender.Id == user.Id);
+            return View("Index", myExchanges);
         }
 
         // GET: Exchanges/Details/5
@@ -89,9 +105,9 @@ namespace SnackExchange.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-                exchange.Sender = _userManager.FindByIdAsync(currentUserId).Result; // current user
-                exchange.SenderId = currentUserId;
+                var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+                exchange.Sender = user; // current user
+                exchange.SenderId = user.Id;
                 exchange.Status = ExchangeStatus.Created;
 
                 exchange.Products = exchange.Products.Where(p => !string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price)).ToList();
@@ -105,16 +121,17 @@ namespace SnackExchange.Web.Controllers
 
                 //foreach()
 
-                var user = exchange.Sender;
-                var exchangeUserModel = new ExchangeUserModel
+                ExchangeUserModel exchangeUserModel = new ExchangeUserModel
                 {
                     UserExchangeRole = UserExchangeRole.Sender,
                     Exchange = exchange,
+                    AppUser = user,
                     UpdatedAt = DateTime.Now
                 };
 
-                _exchangeUserModelRepository.Insert(exchangeUserModel);
                 user.Exchanges.Add(exchangeUserModel);
+
+                _exchangeUserModelRepository.Insert(exchangeUserModel);
                 _userManager.UpdateAsync(user);
 
                 return RedirectToAction(nameof(Index));
@@ -155,7 +172,7 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
         {
             if (id != exchange.Id)
             {
@@ -170,6 +187,7 @@ namespace SnackExchange.Web.Controllers
                     exchange.Sender = user;
                     exchange.SenderId = user.Id;
                     exchange.UpdatedAt = DateTime.Now;
+                    exchange.Status = ExchangeStatus.Created;
                     _exchangeRepository.Update(exchange);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -212,7 +230,42 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public IActionResult DeleteConfirmed(Guid id)
         {
-            _exchangeRepository.Delete(id);
+            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user == null || user.Exchanges.Count <= 0)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            //            ExchangeUserModel userExchange = user.Exchanges.Where(e => e.Id == id).FirstOrDefault();
+
+            Exchange exchange = _exchangeRepository.FindBy(e => e.Id == id).FirstOrDefault();
+            if (exchange == null || exchange.Sender.Id != user.Id)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            ExchangeUserModel userExchangeModel = _exchangeUserModelRepository.FindBy(eu => eu.Exchange.Id == exchange.Id && eu.AppUser.Id == user.Id).FirstOrDefault();
+            if (userExchangeModel == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (exchange.Sender.Id == user.Id || user.IsModerator)
+            {
+
+                for (int i = 0; i < exchange.Products.Count; i++)
+                {
+                    if (exchange.Products.Count > 0)
+                    {
+                        exchange.Products[i].Exchange = null;
+                        _productRepository.Update(exchange.Products[i]);
+                    }
+                }
+
+                user.Exchanges.Remove(userExchangeModel);
+
+                _exchangeRepository.Delete(exchange.Id);
+                _userManager.UpdateAsync(user);
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -226,7 +279,7 @@ namespace SnackExchange.Web.Controllers
         {
             exchange.Sender = user;
             exchange.SenderId = user.Id;
-            exchange.Status = ExchangeStatus.Waiting;
+            exchange.Status = ExchangeStatus.Created;
             return View(exchange);
         }
         public IActionResult AddModerator(Exchange exchange, AppUser user)
@@ -247,6 +300,21 @@ namespace SnackExchange.Web.Controllers
             return View(exchange);
         }
 
+
+        // GET
+        [Authorize]
+        public IActionResult Complete(string Id)
+        {
+            var exchange = _exchangeRepository.GetById(new Guid(Id));
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+
+            if (user == exchange.Sender && exchange.Sender != null && exchange.Receiver != null && (exchange.Offers.Count(o => o.Status == OfferStatus.Accepted) >= 1))
+            {
+                exchange.Status = ExchangeStatus.Completed;
+                _exchangeRepository.Update(exchange);
+            }
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
 
     }
 }

@@ -39,8 +39,9 @@ namespace SnackExchange.Web.Controllers
             }
             else
             {
-                var myAddresses = _addressRepository.FindBy(a => a.UserId == user.Id);
-                return View(myAddresses);
+                return RedirectToAction("Index", "Home", new { area = "" });
+                //var myAddresses = _addressRepository.FindBy(a => a.UserId == user.Id);
+                //return View(myAddresses);
             }
 
         }

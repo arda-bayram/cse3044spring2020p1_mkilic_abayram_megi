@@ -39,8 +39,9 @@ namespace SnackExchange.Web.Controllers
             }
             else
             {
-                var myProducts = _productRepository.FindBy(p => p.Offer.Offerer.Id == user.Id);
-                return View(myProducts);
+                return RedirectToAction("Index", "Home", new { area = "" });
+                //var myProducts = _productRepository.FindBy(p => p.Offer.Offerer.Id == user.Id);
+                //return View(myProducts);
             }
         }
 
@@ -108,7 +109,7 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Name,Description,Price")] Product product)
+        public IActionResult Edit(Guid id, [Bind("Id, Name,Description,Price")] Product product)
         {
             if (id != product.Id)
             {

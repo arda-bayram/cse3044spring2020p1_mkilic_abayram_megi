@@ -39,8 +39,9 @@ namespace SnackExchange.Web.Controllers
             }
             else
             {
-                var myCountry = _countryRepository.FindBy(c => c.Users.Contains(user));
-                return View(myCountry);
+                return RedirectToAction("Index", "Home", new { area = "" });
+                //var myCountry = _countryRepository.FindBy(c => c.Users.Contains(user));
+                //return View(myCountry);
             }
         }
 

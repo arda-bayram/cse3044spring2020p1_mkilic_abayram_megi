@@ -1,7 +1,9 @@
 ﻿@model SnackExchange.Web.Models.Exchange
+@inject Microsoft.AspNetCore.Identity.UserManager<SnackExchange.Web.Models.Auth.AppUser> userManager;
 
 @{
     ViewData["Title"] = "Edit";
+    var user = userManager.FindByNameAsync(User.Identity.Name).Result;
 }
 
 <h1>Edit</h1>
@@ -12,14 +14,39 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @*@if (user.IsModerator)
+        {
+            <div class="form-group">
+                <label asp-for="ModeratorNotes" class="control-label"></label>
+                <input asp-for="ModeratorNotes" class="form-control" />
+                <span asp-validation-for="ModeratorNotes" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="ExchangeNotes" class="control-label"></label>
-                <input asp-for="ExchangeNotes" class="form-control" />
+                <input asp-for="ExchangeNotes" class="form-control" disabled />
                 <span asp-validation-for="ExchangeNotes" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PhotoUrl" class="control-label"></label>
-                <input asp-for="PhotoUrl" class="form-control" />
+                <input asp-for="PhotoUrl" class="form-control" disabled />
+                <span asp-validation-for="PhotoUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TrackingNumber" class="control-label"></label>
+                <input asp-for="TrackingNumber" class="form-control" disabled />
+                <span asp-validation-for="TrackingNumber" class="text-danger"></span>
+            </div>
+        }
+        else
+        {*@
+            <div class="form-group">
+                <label asp-for="ExchangeNotes" class="control-label"></label>
+                <input asp-for="ExchangeNotes" class="form-control" required />
+                <span asp-validation-for="ExchangeNotes" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhotoUrl" class="control-label"></label>
+                <input asp-for="PhotoUrl" class="form-control" required />
                 <span asp-validation-for="PhotoUrl" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,6 +55,12 @@
                 <span asp-validation-for="TrackingNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="ModeratorNotes" class="control-label"></label>
+                <input asp-for="ModeratorNotes" class="form-control" />
+                <span asp-validation-for="ModeratorNotes" class="text-danger"></span>
+            </div>
+            @*}*@
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -35,7 +68,8 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
+           onclick="location.href='@Url.Action("Index", "Home", Model)'" />
 </div>
 
 @section Scripts {

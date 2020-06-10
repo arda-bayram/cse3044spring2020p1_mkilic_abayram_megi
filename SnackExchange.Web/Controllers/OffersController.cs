@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,8 @@ namespace SnackExchange.Web.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Exchange> _exchangeRepository;
+
+        private int BASETRACKINGNUMBER = 123;
 
         public OffersController(ApplicationDbContext context,
             IRepository<Offer> offerRepository,
@@ -67,6 +70,106 @@ namespace SnackExchange.Web.Controllers
             return View(offer);
         }
 
+        // GET: Offers/Accept/5
+        [Authorize]
+        public IActionResult Accept(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
+            // current user
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+
+            IQueryable<Offer> offerQuery = _offerRepository.FindBy(x => x.Id == id);
+
+            Offer offer = offerQuery.FirstOrDefault();
+            if (offer == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Exchange exchange = _exchangeRepository.FindBy(e => e.Id == offer.ExchangeId).FirstOrDefault();
+            if (exchange == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.Id != exchange.SenderId)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                exchange.Receiver = offer.Offerer;
+                exchange.ReceiverId = offer.Offerer.Id;
+            }
+
+            offer.Status = OfferStatus.Accepted;
+            exchange.Status = ExchangeStatus.Accepted;
+
+            exchange.Moderator = _userManager.Users.FirstOrDefault(u => u.IsModerator);
+            exchange.TrackingNumber = string.Format("UPS_TEMP_{0}", BASETRACKINGNUMBER + _offerRepository.GetAll().Count());
+            exchange.ModeratorNotes = "No moderator notes.";
+            //reject other offers
+            foreach (Offer o in exchange.Offers)
+            {
+                if (o.Id != offer.Id)
+                {
+                    o.Status = OfferStatus.Rejected;
+                    o.UpdatedAt = DateTime.Now;
+                }
+            }
+            exchange.UpdatedAt = DateTime.Now;
+
+            _exchangeRepository.Update(exchange);
+            _offerRepository.Update(offer);
+
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
+
+        // GET: Offers/Reject/5
+        [Authorize]
+        public IActionResult Reject(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
+            // current user
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+
+            IQueryable<Offer> offerQuery = _offerRepository.FindBy(x => x.Id == id);
+
+            Offer offer = offerQuery.FirstOrDefault();
+            if (offer == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Exchange exchange = _exchangeRepository.FindBy(e => e.Id == offer.ExchangeId).FirstOrDefault();
+            if (exchange == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.Id != exchange.SenderId)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            offer.Status = OfferStatus.Rejected;
+
+            offer.UpdatedAt = DateTime.Now;
+            exchange.UpdatedAt = DateTime.Now;
+
+            _exchangeRepository.Update(exchange);
+            _offerRepository.Update(offer);
+
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
+
+
         // GET: Offers/Create
         [Authorize]
         public IActionResult Create(string Id)
@@ -75,7 +178,11 @@ namespace SnackExchange.Web.Controllers
             {
                 ExchangeId = new Guid(Id)
             };
-            //model.Products.Add(new Product());
+            var exchange = _exchangeRepository.GetById(model.ExchangeId);
+            if (exchange.Status == ExchangeStatus.Accepted)
+            {
+                return RedirectToAction("Details", "Exchanges", exchange);
+            }
             return View(model);
         }
 
@@ -88,9 +195,10 @@ namespace SnackExchange.Web.Controllers
             if (ModelState.IsValid)
             {
                 var currentUserId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+
                 offer.OffererId = currentUserId;
                 offer.Offerer = _userManager.FindByIdAsync(currentUserId).Result;
-                offer.Status = OfferStatus.Created;
+                offer.Status = OfferStatus.Waiting;
                 offer.Products = offer.Products.Where(p => !string.IsNullOrEmpty(p.Name) && !string.IsNullOrEmpty(p.Price)).ToList();
 
                 foreach (Product p in offer.Products)
@@ -100,12 +208,18 @@ namespace SnackExchange.Web.Controllers
                 }
 
                 _offerRepository.Insert(offer);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(AfterCreate), new { Id = offer.ExchangeId });
             }
             //ViewData["OffererId"] = new SelectList(_context.AppUsers, "Id", "Id", offer.OffererId);
             return View(offer);
         }
 
+        [Authorize]
+        public IActionResult AfterCreate(string Id)
+        {
+            var exchange = _exchangeRepository.GetById(new Guid(Id));
+            return RedirectToAction("Details", "Exchanges", exchange);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -162,7 +276,7 @@ namespace SnackExchange.Web.Controllers
                         offerDb.PhotoUrl = offer.PhotoUrl;
 
                         //TODO: not working right now
-                        foreach(var editProduct in offer.Products)
+                        foreach (var editProduct in offer.Products)
                         {
                             var oldProduct = offerDb.Products.Where(x => x.Id == editProduct.Id).FirstOrDefault();
                             if (oldProduct != null)
@@ -221,10 +335,31 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var offer = await _context.Offer.FindAsync(id);
-            _context.Offer.Remove(offer);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var offer = _offerRepository.GetById(id);
+            var exchange = _exchangeRepository.GetById(offer.Exchange.Id);
+
+            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user == null)
+            {
+                return RedirectToAction("Details", "Exchanges", exchange);
+            }
+
+            if (offer.Offerer.Id == user.Id || user.IsModerator)
+            {
+
+                for (int i = 0; i < offer.Products.Count; i++)
+                {
+                    if (offer.Products.Count > 0)
+                    {
+                        offer.Products[i].Exchange = null;
+                        _productRepository.Update(offer.Products[i]);
+                    }
+                }
+
+                _offerRepository.Delete(offer.Id);
+            }
+
+            return RedirectToAction("Details", "Exchanges", exchange);
         }
 
         private bool OfferExists(Guid id)
