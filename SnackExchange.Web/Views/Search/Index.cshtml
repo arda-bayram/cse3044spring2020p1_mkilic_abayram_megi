@@ -5,86 +5,93 @@
     Exchange oldExchange = null;
     int counter = 0;
     string searchQ = Model[0].ToString();
-    IQueryable<Product> products =(IQueryable<Product>) Model[1];
+    IQueryable<Product> products = (IQueryable<Product>)Model[1];
 }
 
 <h1>Search results for @Html.Raw(searchQ)</h1>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.Raw("")
-            </th>
-            <th>
-                @Html.Raw("Sender")
-            </th>
-            <th>
-                @Html.Raw("Total Price")
-            </th>
-            <th>
-                @Html.Raw("Status")
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in products)
-        {
-            @if (item.Exchange != null)
+@if (products.Count() > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.Raw("")
+                </th>
+                <th>
+                    @Html.Raw("Sender")
+                </th>
+                <th>
+                    @Html.Raw("Total Price")
+                </th>
+                <th>
+                    @Html.Raw("Status")
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in products)
             {
-                @if ((oldExchange == null || oldExchange != item.Exchange) && item.Exchange.Status == ExchangeStatus.Created)
+                @if (item.Exchange != null)
                 {
-                    double totalPrice = 0;
-                    @if (item.Exchange.Products.Count > 0)
+                    @if ((oldExchange == null || oldExchange != item.Exchange) && item.Exchange.Status == ExchangeStatus.Created)
                     {
-                        @for (var i = 0; i < item.Exchange.Products.Count; i++)
+                        double totalPrice = 0;
+                        @if (item.Exchange.Products.Count > 0)
                         {
-                            var priceUnformatted = item.Exchange.Products[i].Price;
-                            double price;
-                            if (priceUnformatted.All(char.IsDigit))
+                            @for (var i = 0; i < item.Exchange.Products.Count; i++)
                             {
-                                price = Double.Parse(item.Exchange.Products[i].Price);
-                            }
-                            else
-                            {
-                                var dotIndex = -1;
-                                dotIndex = priceUnformatted.IndexOf(".");
-                                var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
-                                if (dotIndex != -1)
+                                var priceUnformatted = item.Exchange.Products[i].Price;
+                                double price;
+                                if (priceUnformatted.All(char.IsDigit))
                                 {
-                                    p.Insert(dotIndex, ".");
+                                    price = Double.Parse(item.Exchange.Products[i].Price);
                                 }
-                                price = Double.Parse(p);
+                                else
+                                {
+                                    var dotIndex = -1;
+                                    dotIndex = priceUnformatted.IndexOf(".");
+                                    var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
+                                    if (dotIndex != -1)
+                                    {
+                                        p.Insert(dotIndex, ".");
+                                    }
+                                    price = Double.Parse(p);
+                                }
+                                totalPrice += price;
                             }
-                            totalPrice += price;
                         }
+
+                        counter++;
+                        oldExchange = item.Exchange;
+                        <tr>
+                            <td>
+                                @Html.Raw(counter)
+                            </td>
+                            <td>
+                                @Html.Raw(item.Exchange.Sender.Email)
+                            </td>
+                            <td>
+                                @Html.Raw(totalPrice) $
+                            </td>
+                            <td>
+                                @Html.Raw(item.Exchange.Status)
+                            </td>
+                            <td>
+                                <input type="button" value="Details" class="btn btn-info" id="btnDetails"
+                                       onclick="location.href='@Url.Action("Details", "Exchanges", item.Exchange)'" />
+                            </td>
+                        </tr>
                     }
 
-                    counter++;
-                    oldExchange = item.Exchange;
-                    <tr>
-                        <td>
-                            @Html.Raw(counter)
-                        </td>
-                        <td>
-                            @Html.Raw(item.Exchange.Sender.Email)
-                        </td>
-                        <td>
-                            @Html.Raw(totalPrice) $
-                        </td>
-                        <td>
-                            @Html.Raw(item.Exchange.Status)
-                        </td>
-                        <td>
-                            <input type="button" value="Details" class="btn btn-info" id="btnDetails"
-                                   onclick="location.href='@Url.Action("Details", "Exchanges", item.Exchange)'" />
-                        </td>
-                    </tr>
                 }
 
             }
+        </tbody>
+    </table>
+}
 
-        }
-    </tbody>
-</table>
+else
+{
+    <h1>No products contains: @Html.Raw(searchQ)</h1>
+}
