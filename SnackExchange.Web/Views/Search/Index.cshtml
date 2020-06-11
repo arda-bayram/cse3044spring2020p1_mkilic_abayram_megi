@@ -1,44 +1,97 @@
-﻿@model IEnumerable<SnackExchange.Web.Models.Product>
+﻿@model List<object>
+@using System.Text.RegularExpressions;
 
+@{
+    Exchange oldExchange = null;
+    int counter = 0;
+    string searchQ = Model[0].ToString();
+    IQueryable<Product> products = (IQueryable<Product>)Model[1];
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Offer)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<h1>Search results for @Html.Raw(searchQ)</h1>
+@if (products.Count() > 0)
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Offer.Id)
-                </td>
-                <td>
-                    <a asp-controller="Products" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                </td>
+                <th>
+                    @Html.Raw("")
+                </th>
+                <th>
+                    @Html.Raw("Sender")
+                </th>
+                <th>
+                    @Html.Raw("Total Price")
+                </th>
+                <th>
+                    @Html.Raw("Status")
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in products)
+            {
+                @if (item.Exchange != null)
+                {
+                    @if ((oldExchange == null || oldExchange != item.Exchange) && item.Exchange.Status == ExchangeStatus.Created)
+                    {
+                        double totalPrice = 0;
+                        @if (item.Exchange.Products.Count > 0)
+                        {
+                            @for (var i = 0; i < item.Exchange.Products.Count; i++)
+                            {
+                                var priceUnformatted = item.Exchange.Products[i].Price;
+                                double price;
+                                if (priceUnformatted.All(char.IsDigit))
+                                {
+                                    price = Double.Parse(item.Exchange.Products[i].Price);
+                                }
+                                else
+                                {
+                                    var dotIndex = -1;
+                                    dotIndex = priceUnformatted.IndexOf(".");
+                                    var p = Regex.Replace(priceUnformatted, "[^.0-9]", "");
+                                    if (dotIndex != -1)
+                                    {
+                                        p.Insert(dotIndex, ".");
+                                    }
+                                    price = Double.Parse(p);
+                                }
+                                totalPrice += price;
+                            }
+                        }
+
+                        counter++;
+                        oldExchange = item.Exchange;
+                        <tr>
+                            <td>
+                                @Html.Raw(counter)
+                            </td>
+                            <td>
+                                @Html.Raw(item.Exchange.Sender.Email)
+                            </td>
+                            <td>
+                                @Html.Raw(totalPrice) $
+                            </td>
+                            <td>
+                                @Html.Raw(item.Exchange.Status)
+                            </td>
+                            <td>
+                                <input type="button" value="Details" class="btn btn-info" id="btnDetails"
+                                       onclick="location.href='@Url.Action("Details", "Exchanges", item.Exchange)'" />
+                            </td>
+                        </tr>
+                    }
+
+                }
+
+            }
+        </tbody>
+    </table>
+}
+
+else
+{
+    <h1>No products contains: @Html.Raw(searchQ)</h1>
+}

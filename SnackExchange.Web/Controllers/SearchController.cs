@@ -34,10 +34,16 @@ namespace SnackExchange.Web.Controllers
             _productRepository = productRepository;
         }
 
+        [Authorize]
         public IActionResult Index(string q)
         {
             IQueryable<Product> products = _productRepository.FindBy(p => p.Name.Contains(q) || p.Description.Contains(q));
-            return View(products);
+            List<object> model = new List<object>
+            {
+                q,
+                products
+            };
+            return View(model);
         }
     }
 }

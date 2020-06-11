@@ -23,19 +23,22 @@ namespace SnackExchange.Web.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
         private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Offer> _offerRepository;
 
         public ExchangesController(
             IRepository<Exchange> exchangeRepository,
             IRepository<ExchangeUserModel> exchangeUserModelRepository,
             IHttpContextAccessor httpContextAccessor,
             UserManager<AppUser> userManager,
-            IRepository<Product> productRepository)
+            IRepository<Product> productRepository,
+            IRepository<Offer> offerRepository)
         {
             _exchangeRepository = exchangeRepository;
             _exchangeUserModelRepository = exchangeUserModelRepository;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _productRepository = productRepository;
+            _offerRepository = offerRepository;
         }
 
         // GET: Exchanges
@@ -48,7 +51,7 @@ namespace SnackExchange.Web.Controllers
             {
                 if (user.UserStatus != UserStatus.Banned || user.UserStatus != UserStatus.Inactive)
                 {
-                    return View(_exchangeRepository.FindBy( e => e.Status != ExchangeStatus.Completed));
+                    return View(_exchangeRepository.FindBy(e => e.Status != ExchangeStatus.Completed));
                 }
                 else
                 {
@@ -172,7 +175,7 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl")] Exchange exchange)
         {
             if (id != exchange.Id)
             {
@@ -184,11 +187,19 @@ namespace SnackExchange.Web.Controllers
                 try
                 {
                     var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
-                    exchange.Sender = user;
-                    exchange.SenderId = user.Id;
-                    exchange.UpdatedAt = DateTime.Now;
-                    exchange.Status = ExchangeStatus.Created;
-                    _exchangeRepository.Update(exchange);
+                    var exchangeDb = _exchangeRepository.GetById(exchange.Id);
+                    if (user == exchangeDb.Sender || user.IsModerator)
+                    {
+                        exchangeDb.ExchangeNotes = exchange.ExchangeNotes;
+                        exchangeDb.PhotoUrl = exchange.PhotoUrl;
+                    }
+                    exchangeDb.ModeratorNotes = exchange.ModeratorNotes;
+                    if (exchangeDb.Moderator == null && user.IsModerator)
+                    {
+                        exchangeDb.Moderator = user;
+                    }
+                    exchangeDb.UpdatedAt = DateTime.Now;
+                    _exchangeRepository.Update(exchangeDb);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -216,7 +227,8 @@ namespace SnackExchange.Web.Controllers
                 return NotFound();
             }
             var exchange = _exchangeRepository.GetById(id);
-            if (exchange == null || _userManager.GetUserId(_httpContextAccessor.HttpContext.User) != exchange.Sender.Id)
+            var user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            if (exchange == null || !(user == exchange.Sender || user.IsModerator))
             {
                 return NotFound();
             }
@@ -258,6 +270,20 @@ namespace SnackExchange.Web.Controllers
                     {
                         exchange.Products[i].Exchange = null;
                         _productRepository.Update(exchange.Products[i]);
+                    }
+                }
+
+                for (int i = 0; i < exchange.Offers.Count; i++)
+                {
+                    if (exchange.Offers.Count > 0)
+                    {
+                        for(int j = 0; j < exchange.Offers[i].Products.Count; j++)
+                        {
+                            exchange.Offers[i].Products[j].Offer = null;
+                            exchange.Offers[i].Products[j].Exchange = null;
+                            _productRepository.Update(exchange.Offers[i].Products[j]);
+                        }
+                        _offerRepository.Delete(exchange.Offers[i].Id);
                     }
                 }
 

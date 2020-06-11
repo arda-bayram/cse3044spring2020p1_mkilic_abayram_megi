@@ -19,57 +19,60 @@
 
                     @if (user.IsModerator)
                     {
-                        <dt class="col-sm-2">
+                        <dt class="col-sm-3">
                             @Html.DisplayNameFor(model => model.ModeratorNotes)
                         </dt>
-                        <dd class="col-sm-10">
+                        <dd class="col-sm-7">
                             @Html.DisplayFor(model => model.ModeratorNotes)
                         </dd>
                     }
 
-                    <dt class="col-sm-2">
+                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.ExchangeNotes)
                     </dt>
-                    <dd class="col-sm-10">
+                    <dd class="col-sm-7">
                         @Html.DisplayFor(model => model.ExchangeNotes)
                     </dd>
-                    <dt class="col-sm-2">
+                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.TrackingNumber)
                     </dt>
-                    <dd class="col-sm-10">
+                    <dd class="col-sm-7">
                         @Html.DisplayFor(model => model.TrackingNumber)
                     </dd>
-                    <dt class="col-sm-2">
+                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.Sender)
                     </dt>
-                    <dd class="col-sm-10">
+                    <dd class="col-sm-7">
                         @Html.DisplayFor(model => model.Sender.Email)
                     </dd>
-                    <dt class="col-sm-2">
+                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.Receiver)
                     </dt>
                     @if (Model.Receiver != null)
                     {
-                        <dd class="col-sm-10">
+                        <dd class="col-sm-7">
                             @Html.DisplayFor(model => model.Receiver.Email)
                         </dd>
                     }
                     else
                     {
-                        <dd class="col-sm-10">
-                            @Html.Raw("<p> - </p>")
+                        <dd class="col-sm-7">
+                            @Html.Raw(" - ")
                         </dd>
                     }
-                    <dt class="col-sm-2">
-                        @Html.DisplayNameFor(model => model.Moderator)
-                    </dt>
-                    <dd class="col-sm-10">
-                        @Html.DisplayFor(model => model.Moderator.Id)
-                    </dd>
-                    <dt class="col-sm-2">
+                    @if (Model.Moderator != null && user.IsModerator)
+                    {
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Moderator)
+                        </dt>
+                        <dd class="col-sm-7">
+                            @Html.DisplayFor(model => model.Moderator.Email)
+                        </dd>
+                    }
+                    <dt class="col-sm-3">
                         @Html.DisplayNameFor(model => model.Status)
                     </dt>
-                    <dd class="col-sm-10">
+                    <dd class="col-sm-7">
                         @Html.DisplayFor(model => model.Status)
                     </dd>
                 </dl>
@@ -109,7 +112,7 @@
                onclick="location.href='@Url.Action("Complete", "Exchanges", Model)'" />
     }
 
-    @if (Model.Status == ExchangeStatus.Created && user.Email == Model.Sender.Email)
+    @if (Model.Status == ExchangeStatus.Created && (user.Email == Model.Sender.Email || user.IsModerator))
     {
         <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
                onclick="location.href='@Url.Action("Delete", "Exchanges", Model)'" />
@@ -193,10 +196,11 @@
     @if (Model.Offers.Count <= 0)
     {
         @Html.Raw("<h4>No offers proposed yet!<h4>")
+        <br />
     }
     else
     {
-        <table class="table">
+        <table class="table" style="width: 100%; table-layout: fixed;">
             <thead>
                 <tr>
                     <th class="col-sm-2">
@@ -258,16 +262,37 @@
                         @if (Model.Offers[i].Status == OfferStatus.Accepted)
                         {
                             <tr>
-                                <td class="col-sm-2" style="color:green">
+                                <td class="col-sm-2" style="color:green;">
                                     @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
                                 </td>
-                                <td class="col-sm-2" style="color:green">
+                                <td class="col-sm-2" style="color:green;">
                                     @Html.DisplayFor(model => model.Offers[i].OfferNotes)
                                 </td>
                                 <td class="col-sm-2" style="color:green">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
                                 </td>
                                 <td class="col-sm-2" style="color:green">
+                                    @Html.Raw(totalPrice) $
+                                </td>
+                                <td class="col-sm-2">
+                                    <input type="button" value="Show" class="btn btn-info" id="btnShow"
+                                           onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
+                                </td>
+                            </tr>
+                        }
+                        else if (Model.Offers[i].Status == OfferStatus.Rejected)
+                        {
+                            <tr>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
                                     @Html.Raw(totalPrice) $
                                 </td>
                                 <td class="col-sm-2">
@@ -288,7 +313,7 @@
                                 <td class="col-sm-2">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
                                 </td>
-                                <td>
+                                <td class="col-sm-2">
                                     @Html.Raw(totalPrice) $
                                 </td>
                             </tr>
@@ -336,14 +361,7 @@
                                     <input type="button" value="Show" class="btn btn-info" id="btnShow"
                                            onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
-                                @if (Model.Status == ExchangeStatus.Created && (Model.Offers[i].Offerer.Id == user.Id || Model.Offers[i].Exchange.Sender.Id == user.Id))
-                                {
-                                    <td class="col-sm-2">
-                                        <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
-                                               onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
-                                    </td>
-                                }
-                                @if (user.IsModerator == false && Model.Offers[i].Offerer.Email != user.Email && (Model.Offers[i].Status == OfferStatus.Waiting))
+                                @if (user.IsModerator == false && Model.Sender.Email == user.Email && (Model.Offers[i].Status == OfferStatus.Waiting))
                                 {
                                     <td class="col-sm-2">
                                         <input type="button" value="Accept" class="btn btn-success" id="btnAccept"
@@ -370,7 +388,7 @@
         <div>
             @if ((Model.Status == ExchangeStatus.Created || Model.Status == ExchangeStatus.None))
             {
-                <input type="button" value="Offer" class="btn btn-info" id="btnOffer"
+                <input type="button" value="Offer" class="btn btn-primary" id="btnOffer"
                        onclick="location.href='@Url.Action("Create", "Offers", Model)'" />
             }
             <input type="button" value="Back to List" class="btn btn-info" id="btnBack"
