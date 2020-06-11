@@ -196,10 +196,11 @@
     @if (Model.Offers.Count <= 0)
     {
         @Html.Raw("<h4>No offers proposed yet!<h4>")
+        <br />
     }
     else
     {
-        <table class="table">
+        <table class="table" style="width: 100%; table-layout: fixed;">
             <thead>
                 <tr>
                     <th class="col-sm-2">
@@ -261,10 +262,10 @@
                         @if (Model.Offers[i].Status == OfferStatus.Accepted)
                         {
                             <tr>
-                                <td class="col-sm-2" style="color:green">
+                                <td class="col-sm-2" style="color:green;">
                                     @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
                                 </td>
-                                <td class="col-sm-2" style="color:green">
+                                <td class="col-sm-2" style="color:green;">
                                     @Html.DisplayFor(model => model.Offers[i].OfferNotes)
                                 </td>
                                 <td class="col-sm-2" style="color:green">
@@ -339,13 +340,6 @@
                                     <input type="button" value="Show" class="btn btn-info" id="btnShow"
                                            onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
                                 </td>
-                                @*@if (Model.Status == ExchangeStatus.Created && (Model.Offers[i].Offerer.Id == user.Id || Model.Offers[i].Exchange.Sender.Id == user.Id))
-                                    {
-                                        <td class="col-sm-2">
-                                            <input type="button" value="Delete" class="btn btn-danger" id="btnDelete"
-                                                   onclick="location.href='@Url.Action("Delete", "Offers", new { id = Model.Offers[i].Id })'" />
-                                        </td>
-                                    }*@
                                 @if (user.IsModerator == false && Model.Sender.Email == user.Email && (Model.Offers[i].Status == OfferStatus.Waiting))
                                 {
                                     <td class="col-sm-2">
