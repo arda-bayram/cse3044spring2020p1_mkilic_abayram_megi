@@ -280,6 +280,27 @@
                                 </td>
                             </tr>
                         }
+                        else if (Model.Offers[i].Status == OfferStatus.Rejected)
+                        {
+                            <tr>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Offerer.Email)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].OfferNotes)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.DisplayFor(model => model.Offers[i].Status)
+                                </td>
+                                <td class="col-sm-2" style="color:red">
+                                    @Html.Raw(totalPrice) $
+                                </td>
+                                <td class="col-sm-2">
+                                    <input type="button" value="Show" class="btn btn-info" id="btnShow"
+                                           onclick="location.href='@Url.Action("Details", "Offers", new { id = Model.Offers[i].Id })'" />
+                                </td>
+                            </tr>
+                        }
                         else
                         {
                             <tr>
@@ -292,7 +313,7 @@
                                 <td class="col-sm-2">
                                     @Html.DisplayFor(model => model.Offers[i].Status)
                                 </td>
-                                <td>
+                                <td class="col-sm-2">
                                     @Html.Raw(totalPrice) $
                                 </td>
                             </tr>
