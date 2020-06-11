@@ -175,7 +175,7 @@ namespace SnackExchange.Web.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl,TrackingNumber")] Exchange exchange)
+        public IActionResult Edit(Guid id, [Bind("Id,ModeratorNotes,ExchangeNotes,PhotoUrl")] Exchange exchange)
         {
             if (id != exchange.Id)
             {
@@ -192,7 +192,6 @@ namespace SnackExchange.Web.Controllers
                     {
                         exchangeDb.ExchangeNotes = exchange.ExchangeNotes;
                         exchangeDb.PhotoUrl = exchange.PhotoUrl;
-                        exchangeDb.TrackingNumber = exchange.TrackingNumber;
                     }
                     exchangeDb.ModeratorNotes = exchange.ModeratorNotes;
                     if (exchangeDb.Moderator == null && user.IsModerator)
